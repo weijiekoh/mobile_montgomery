@@ -1,14 +1,7 @@
 CC     = gcc
 CFLAGS = -O3 -Wall
-
-# Flags for the Acar implementation
-CFLAGS_ACAR = $(CFLAGS)
-TARGET = bigint
-SRC    = tests/acar/bigint.c
-
-all: $(TARGET)
-
-TIME := $(shell which time)
+# Flags for the Bos implementation
+CFLAGS_BOS = $(CFLAGS)
 
 all: clean mkdir tests benchmarks
 
@@ -16,30 +9,45 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_acar_bigint tests_acar_mont
+tests: tests_bigints tests_acar_mont tests_bos_mont
 
 run_tests:
-	build/tests/acar/bigint
+	build/tests/bigints/bigint_8x32/bigint
 	build/tests/acar/mont
+	build/tests/bos/mont
 
-tests_acar_bigint: N := bigint
-tests_acar_bigint:
-	mkdir -p build/tests/acar
-	echo $(CC) $(CFLAGS_ACAR) tests/acar/$(N).c -o build/tests/acar/$(N)
-	$(CC) $(CFLAGS_ACAR) tests/acar/$(N).c -o build/tests/acar/$(N)
+## tests/bigints
+tests_bigints: tests_bigints_bigint_8x32
 
-run_tests_acar_bigint:
-	build/tests/acar/bigint
+### tests/bigints/bigint_8x32
+tests_bigints_bigint_8x32: N := bigint
+tests_bigints_bigint_8x32:
+	mkdir -p build/tests/bigints/bigint_8x32
+	echo $(CC) $(CFLAGS) tests/bigints/bigint_8x32/$(N).c -o build/tests/bigints/bigint_8x32/$(N)
+	$(CC) $(CFLAGS) tests/bigints/bigint_8x32/$(N).c -o build/tests/bigints/bigint_8x32/$(N)
 
+run_tests_bigints_bigint_8x32:
+	build/tests/bigints/bigint_8x32/bigint
+
+## tests/acar/mont
 tests_acar_mont: N := mont
 tests_acar_mont:
 	mkdir -p build/tests/acar
-	echo $(CC) $(CFLAGS_ACAR) tests/acar/$(N).c -o build/tests/acar/$(N)
-	$(CC) $(CFLAGS_ACAR) tests/acar/$(N).c -o build/tests/acar/$(N)
+	echo $(CC) $(CFLAGS) tests/acar/$(N).c -o build/tests/acar/$(N)
+	$(CC) $(CFLAGS) tests/acar/$(N).c -o build/tests/acar/$(N)
 
 run_tests_acar_mont:
 	build/tests/acar/mont
 
+## tests/bos/mont
+tests_bos_mont: N := mont
+tests_bos_mont:
+	mkdir -p build/tests/bos
+	echo $(CC) $(CFLAGS) tests/bos/$(N).c -o build/tests/bos/$(N)
+	$(CC) $(CFLAGS) tests/bos/$(N).c -o build/tests/bos/$(N)
+
+run_tests_bos_mont:
+	build/tests/bos/mont
 
 # Benchmarks
 benchmarks: benchmarks_acar
@@ -50,8 +58,8 @@ run_benchmarks:
 benchmarks_acar: N := benchmark
 benchmarks_acar:
 	mkdir -p build/benchmarks/acar
-	echo $(CC) $(CFLAGS_ACAR) benchmarks/acar/$(N).c -o build/benchmarks/acar/$(N)
-	$(CC) $(CFLAGS_ACAR) benchmarks/acar/$(N).c -o build/benchmarks/acar/$(N)
+	echo $(CC) $(CFLAGS) benchmarks/acar/$(N).c -o build/benchmarks/acar/$(N)
+	$(CC) $(CFLAGS) benchmarks/acar/$(N).c -o build/benchmarks/acar/$(N)
 
 run_benchmarks_acar:
 	build/benchmarks/acar/benchmark

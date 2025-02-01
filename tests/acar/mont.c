@@ -1,8 +1,9 @@
 #include "../minunit.h"
 #include <stdio.h>
 
-#include "../../c/acar/bigint.h"
-#include "../../c/acar/hex.h"
+#include "../../c/bigints/bigint_8x32/bigint.h"
+#include "../../c/bigints/bigint_8x32/hex.h"
+#include "../../c/acar/mont.h"
 #include "./test_mont_data.h"
 
 MU_TEST(test_mont_mul) {

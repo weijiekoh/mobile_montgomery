@@ -1,8 +1,8 @@
 #include <string.h>
 
-#include "../minunit.h"
-#include "../../c/acar/bigint.h"
-#include "../../c/acar/hex.h"
+#include "../../minunit.h"
+#include "../../../c/bigints/bigint_8x32/bigint.h"
+#include "../../../c/bigints/bigint_8x32/hex.h"
 
 MU_TEST(test_bigint_gt) {
     const char *a_hex_str = "30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47";
