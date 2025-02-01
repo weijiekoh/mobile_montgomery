@@ -1,3 +1,4 @@
+#include "../simd/simd.h"
 /// Algorithm 4 of "Montgomery Arithmetic from a Software Perspective" by Bos and Montgomery
 /// Uses SIMD opcodes.
 /// Also see:
@@ -8,9 +9,7 @@ BigInt mont_mul(
     BigInt *p,
     uint64_t mu
 ) {
-    const size_t NUM_LIMBS = 8;
-    uint64_t mask_64 = 0xffffffff;
-    i128 mask = i64x2_make(mask_64, mask_64);
+    i128 mask = i64x2_make(LIMB_MASK, LIMB_MASK);
 
     i128 de[8] = {
         i64x2_make(0, 0),
@@ -40,7 +39,7 @@ BigInt mont_mul(
         d0_minus_e0 = d0 - e0;
 
         // q = (mub0)aj + mu(d0 - e0) mod 2^32
-        q = (mu_b0 * ar->v[j] + mu * d0_minus_e0) & mask_64;
+        q = (mu_b0 * ar->v[j] + mu * d0_minus_e0) & LIMB_MASK;
 
         // t0 = ajb0 + d0
         // t1 = qp0 + e0
@@ -50,7 +49,7 @@ BigInt mont_mul(
 
         t01 = i64x2_add(
             // ajb0, qp0
-            u64x2_mul(aq, bp[0]),
+            i64x2_mul(aq, bp[0]),
             de[0]
         );
 
@@ -62,7 +61,7 @@ BigInt mont_mul(
             // p1 = qpi + t1 + ei
             p01 = i64x2_add(
                 i64x2_add(t01, de[i]),
-                u64x2_mul(aq, bp[i])
+                i64x2_mul(aq, bp[i])
             );
 
             // t0 = p0 / 2^32
@@ -84,15 +83,9 @@ BigInt mont_mul(
         e.v[i] = i64x2_extract_h(de[i]);
     }
 
-    BigInt res;
-    res = bigint_new();
     if (bigint_gt(&e, &d)) {
-        BigInt e_minus_d;
-        bigint_sub(&e_minus_d, &e, &d);
-        bigint_sub(&res, p, &e_minus_d);
-    } else {
-        bigint_sub(&res, &d, &e);
+        BigInt e_minus_d = bigint_sub(&e, &d);
+        return bigint_sub(p, &e_minus_d);
     }
-
-    return res;
+    return bigint_sub(&d, &e);
 }

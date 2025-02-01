@@ -1,7 +1,8 @@
 CC     = gcc
 CFLAGS = -O3 -Wall
+CFLAGS_SSE = $(CFLAGS) -msse4.1
 # Flags for the Bos implementation
-CFLAGS_BOS = $(CFLAGS)
+CFLAGS_BOS = $(CFLAGS_SSE)
 
 all: clean mkdir tests benchmarks
 
@@ -9,12 +10,26 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_bigints tests_acar_mont tests_bos_mont
+tests: tests_simd tests_bigints tests_acar_mont tests_bos_mont
 
 run_tests:
+	build/tests/simd/sse4.1
 	build/tests/bigints/bigint_8x32/bigint
 	build/tests/acar/mont
 	build/tests/bos/mont
+
+## tests/simd
+tests_simd: tests_simd_sse4.1
+
+### tests/simd/sse4.1
+tests_simd_sse4.1: N := sse4.1
+tests_simd_sse4.1:
+	mkdir -p build/tests/simd
+	echo $(CC) $(CFLAGS_SSE) tests/simd/$(N).c -o build/tests/simd/$(N)
+	$(CC) $(CFLAGS_SSE) tests/simd/$(N).c -o build/tests/simd/$(N)
+
+run_tests_simd_sse4.1:
+	build/tests/simd/sse4.1
 
 ## tests/bigints
 tests_bigints: tests_bigints_bigint_8x32
@@ -43,8 +58,8 @@ run_tests_acar_mont:
 tests_bos_mont: N := mont
 tests_bos_mont:
 	mkdir -p build/tests/bos
-	echo $(CC) $(CFLAGS) tests/bos/$(N).c -o build/tests/bos/$(N)
-	$(CC) $(CFLAGS) tests/bos/$(N).c -o build/tests/bos/$(N)
+	echo $(CC) $(CFLAGS_BOS) tests/bos/$(N).c -o build/tests/bos/$(N)
+	$(CC) $(CFLAGS_BOS) tests/bos/$(N).c -o build/tests/bos/$(N)
 
 run_tests_bos_mont:
 	build/tests/bos/mont

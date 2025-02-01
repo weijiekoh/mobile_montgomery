@@ -1,4 +1,3 @@
 #define NUM_LIMBS 8
 #define BITS_PER_LIMB 32
 #define LIMB_MASK 0xFFFFFFFF
-
