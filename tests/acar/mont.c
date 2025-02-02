@@ -4,7 +4,7 @@
 #include "../../c/bigints/bigint_8x32/bigint.h"
 #include "../../c/bigints/bigint_8x32/hex.h"
 #include "../../c/acar/mont.h"
-#include "./test_mont_data.h"
+#include "../data/test_mont_data.h"
 
 MU_TEST(test_mont_mul) {
     uint64_t n0 = 4026531839;

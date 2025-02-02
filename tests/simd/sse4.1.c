@@ -21,6 +21,7 @@ MU_TEST(test_i128_add) {
     uint64_t a_lo = 1;
     uint64_t a_hi = 2;
     i128 a = i64x2_make(a_hi, a_lo);
+
     uint64_t b_lo = 3;
     uint64_t b_hi = 4;
     i128 b = i64x2_make(b_hi, b_lo);

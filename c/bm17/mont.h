@@ -12,14 +12,14 @@ BigInt mont_mul(
     i128 mask = i64x2_make(LIMB_MASK, LIMB_MASK);
 
     i128 de[8] = {
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
-        i64x2_make(0, 0),
+        i128_zero(),
+        i128_zero(),
+        i128_zero(),
+        i128_zero(),
+        i128_zero(),
+        i128_zero(),
+        i128_zero(),
+        i128_zero(),
     };
 
     uint64_t mu_b0 = mu * br->v[0];
@@ -34,8 +34,9 @@ BigInt mont_mul(
 
     for (int j = 0; j < NUM_LIMBS; j ++) {
         // Compute q
-        d0 = i64x2_extract_l(de[0]);
-        e0 = i64x2_extract_h(de[0]);
+        d0 = i64x2_extract_h(de[0]);
+        e0 = i64x2_extract_l(de[0]);
+
         d0_minus_e0 = d0 - e0;
 
         // q = (mub0)aj + mu(d0 - e0) mod 2^32
@@ -49,7 +50,7 @@ BigInt mont_mul(
 
         t01 = i64x2_add(
             // ajb0, qp0
-            i64x2_mul(aq, bp[0]),
+            u64x2_mul(aq, bp[0]),
             de[0]
         );
 
@@ -61,7 +62,7 @@ BigInt mont_mul(
             // p1 = qpi + t1 + ei
             p01 = i64x2_add(
                 i64x2_add(t01, de[i]),
-                i64x2_mul(aq, bp[i])
+                u64x2_mul(aq, bp[i])
             );
 
             // t0 = p0 / 2^32
@@ -79,8 +80,8 @@ BigInt mont_mul(
     BigInt e = bigint_new();
 
     for (int i = 0; i < NUM_LIMBS; i ++) {
-        d.v[i] = i64x2_extract_l(de[i]);
-        e.v[i] = i64x2_extract_h(de[i]);
+        d.v[i] = i64x2_extract_h(de[i]);
+        e.v[i] = i64x2_extract_l(de[i]);
     }
 
     if (bigint_gt(&e, &d)) {

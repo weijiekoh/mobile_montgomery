@@ -3,7 +3,7 @@
 #include "../time.h"
 #include "../../c/bigints/bigint_8x32/bigint.h"
 #include "../../c/bigints/bigint_8x32/hex.h"
-#include "../../c/acar/mont.h"
+#include "../../c/bm17/mont.h"
 #include "../data/benchmark_mont_data.h"
 
 BigInt reference_func(
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     assert(result == 0);
 
     int num_runs = 5;
-    uint64_t n0 = 4026531839;
+    uint64_t mu = 268435457;
 
     for (int i = 0; i < length; i++) {
         int cost = data[i].cost;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
         double avg = 0;
         for (int i = 0; i < num_runs; i++) {
             double start = get_now_ms();
-            expected = reference_func(&a, &b, &p, n0, cost);
+            expected = reference_func(&a, &b, &p, mu, cost);
             double end = get_now_ms();
             double elapsed = end - start;
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         }
         avg /= num_runs;
 
-        printf("%d Mont muls with Acar's CIOS method (non-SIMD) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
+        printf("%d Mont muls with BM17's CIOS method (SIMD) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
 
         assert(bigint_eq(&expected, &c));
     }

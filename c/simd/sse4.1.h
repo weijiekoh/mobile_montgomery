@@ -15,13 +15,16 @@ inline i128 i128_zero() { return _mm_setzero_si128(); }
 void print_i128(i128 in) {
     unsigned long long v[2];
     _mm_storeu_si128((i128*)v, in);
-    printf("(hi: %016llx; lo: %016llx)", v[1], v[0]);
+    printf("(lo: %016llx; hi: %016llx)", v[0], v[1]);
 }
 
 /*
  * Returns the i128 value containing the concatenation of hi and lo.
  */
 static inline i128 i64x2_make(uint64_t hi, uint64_t lo) {
+    // __m128i _mm_set_epi64x (__int64 hi, __int64 lo):
+    //  dst[63:0] := lo
+    //  dst[127:64] := hi
     return _mm_set_epi64x(hi, lo);
 }
 
@@ -47,7 +50,7 @@ static inline i128 i64x2_add(i128 a, i128 b) {
     return _mm_add_epi64(a, b);
 }
 
-static inline i128 i64x2_mul(i128 a, i128 b) {
+static inline i128 u64x2_mul(i128 a, i128 b) {
     return _mm_mul_epu32(a, b);
 }
 
