@@ -23,6 +23,7 @@ The following algorithms are not yet implemented:
 
 - [ ] The [gnark optimisation](https://hackmd.io/@gnark/modular_multiplication) of CIOS.
 - [ ] Yuval Domb's CIOS [implementation](https://github.com/ingonyama-zk/ingo_skyscraper/tree/main/src).
+- [ ] Further optimisations to BM17 in [SLGCK14](https://eprint.iacr.org/2014/760.pdf).
 - [ ] Mitscha-Baude's [reduced-radix FIOS method](https://github.com/mitschabaude/montgomery/blob/main/doc/zprize22.md#13-x-30-bit-multiplication).
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
 - [ ] Montgomery squaring variants of all of the above algorithms.
