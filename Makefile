@@ -111,6 +111,10 @@ run_benchmarks_neon:
 	build/benchmarks/acar/benchmark_neon
 	build/benchmarks/bm17/benchmark_neon
 
+emulate_benchmarks_neon:
+	$(EMULATOR) build/benchmarks/acar/benchmark_neon
+	$(EMULATOR) build/benchmarks/bm17/benchmark_neon
+
 ## Acar
 benchmarks_acar: N := benchmark
 benchmarks_acar:
