@@ -2,6 +2,24 @@
 #include "../../c/simd/simd.h"
 /*#include <stdio.h>*/
 
+// i64s
+MU_TEST(test_i64_zero) {
+    i64 zero_vector = i64_zero();
+    mu_check(i32x2_extract_h(zero_vector) == (uint32_t)0);
+    mu_check(i32x2_extract_l(zero_vector) == (uint32_t)0);
+}
+
+MU_TEST(test_i64_make_and_extract) {
+    uint32_t lo = 999;
+    uint32_t hi = 111;
+    i64 b = i32x2_make(hi, lo);
+    print_i64(b); printf("\n");
+
+    mu_check(i32x2_extract_h(b) == hi);
+    mu_check(i32x2_extract_l(b) == lo);
+}
+
+// i128s
 MU_TEST(test_i128_zero) {
     i128 zero_vector = i128_zero();
     mu_check(i64x2_extract_h(zero_vector) == 0);
@@ -33,6 +51,8 @@ MU_TEST(test_i128_add) {
 }
 
 MU_TEST_SUITE(test_suite) {
+    MU_RUN_TEST(test_i64_zero);
+    MU_RUN_TEST(test_i64_make_and_extract);
     MU_RUN_TEST(test_i128_zero);
     MU_RUN_TEST(test_i128_add);
     MU_RUN_TEST(test_i128_make_and_extract);

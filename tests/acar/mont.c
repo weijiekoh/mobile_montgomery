@@ -7,6 +7,7 @@
 #include "../data/test_mont_data.h"
 
 MU_TEST(test_mont_mul) {
+    // For the BN254 scalar field.
     uint64_t n0 = 4026531839;
     char* p_hex = "30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001";
 

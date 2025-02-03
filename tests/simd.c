@@ -1,5 +1,5 @@
-#include "../minunit.h"
-#include "../../c/simd/simd.h"
+#include "./minunit.h"
+#include "../c/simd/simd.h"
 /*#include <stdio.h>*/
 
 // i64s
@@ -13,7 +13,6 @@ MU_TEST(test_i64_make_and_extract) {
     uint32_t lo = 999;
     uint32_t hi = 111;
     i64 b = i32x2_make(hi, lo);
-    print_i64(b); printf("\n");
 
     mu_check(i32x2_extract_h(b) == hi);
     mu_check(i32x2_extract_l(b) == lo);
@@ -63,3 +62,4 @@ int main(int argc, char *argv[]) {
 	MU_REPORT();
 	return MU_EXIT_CODE;
 }
+
