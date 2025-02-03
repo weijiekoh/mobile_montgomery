@@ -1,10 +1,8 @@
 # Montgomery multiplication benchmarks
 
-This repo contains implementations and benchmarks of Montgomery multiplication
-algorithms, and benchmarks for non-WASM platforms.
-
-The goal is to find the most suitable algorithm and implementation for mobile
-devices, particulary those which implement NEON instructions.
+What is the fastest way to perform Montgomery multiplication for large prime
+fields on ARM-based mobile devices? To find the answer, this repo implements
+and benchmarks various Montgomery multiplication algorithms.
 
 ## Install requirements
 
@@ -24,9 +22,15 @@ sudo apt install gcc make gcc-aarch64-linux-gnu qemu-aarch64
 The following algorithms are not yet implemented:
 
 - [ ] The [gnark optimisation](https://hackmd.io/@gnark/modular_multiplication) of CIOS.
+- [ ] Yuval Domb's CIOS [implementation](https://github.com/ingonyama-zk/ingo_skyscraper/tree/main/src).
 - [ ] Mitscha-Baude's [reduced-radix FIOS method](https://github.com/mitschabaude/montgomery/blob/main/doc/zprize22.md#13-x-30-bit-multiplication).
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
 - [ ] Montgomery squaring variants of all of the above algorithms.
+
+### BM17
+
+The key optimisation in BM17 is its use of NEON vector instructions to perform identical arithmetic steps of the interleaved  ,
+particularly the `vmlal_u32` instruction, which performs 2-lane multiply-and-add operations.
 
 ## Quick start
 
