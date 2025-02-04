@@ -34,6 +34,15 @@ The following algorithms are not yet implemented:
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
 - [ ] Montgomery squaring variants of all of the above algorithms.
 
+| Algorithm           | ARM32 | ARM64 | NEON | Squaring | Notes                                                |
+|-|-|-|-|-|-|
+| Acar (CIOS)         | Done  | TODO | N/A  | TODO     |                                                       |
+| BH23                | Done  | TODO | N/A  | TODO     | The gnark-optimised version of CIOS.                  |
+| BM17                | TODO  | Done | Yes  | TODO     | Uses NEON vector instructions.                        |
+| Yuval Domb CIOS     | TODO  | TODO | N    | TODO     |                                                       |
+| EZW18               | TODO  | TODO | ?    | TODO     | Emmart's method. Requires floating-point `madd`.      |
+| Mitscha-Baude       | TODO  | TODO | N    | TODO     | Reduced-radix FIOS                                    |
+
 ### BH23
 
 Achieves minor performance gains over the classic CIOS method by Acar by
