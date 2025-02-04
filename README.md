@@ -4,6 +4,10 @@ What is the fastest way to perform Montgomery multiplication for large prime
 fields on ARM-based mobile devices? To find the answer, this repo implements
 and benchmarks various Montgomery multiplication algorithms.
 
+Throughout the repo, the [BN254](https://hackmd.io/@jpw/bn254) scalar field is
+used as the prime order:
+`0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001`.
+
 ## Install requirements
 
 In Ubuntu Linux:
@@ -16,17 +20,25 @@ sudo apt install gcc make gcc-aarch64-linux-gnu qemu-aarch64
 
 - [x] The CIOS method by [Acar
   (1996)](https://www.microsoft.com/en-us/research/wp-content/uploads/1996/01/j37acmon.pdf).
+- [x] The [gnark optimisation](https://hackmd.io/@gnark/modular_multiplication)
+  of CIOS in
+  [BH23](https://tches.iacr.org/index.php/TCHES/article/view/10972/10279).
 - [x] The NEON-optimised method in [BM17](https://eprint.iacr.org/2017/1057.pdf) by Joppe Bos.
 - [ ] Montgomery squaring variants of all of the above algorithms.
 
 The following algorithms are not yet implemented:
 
-- [ ] The [gnark optimisation](https://hackmd.io/@gnark/modular_multiplication) of CIOS.
 - [ ] Yuval Domb's CIOS [implementation](https://github.com/ingonyama-zk/ingo_skyscraper/tree/main/src).
 - [ ] Further optimisations to BM17 in [SLGCK14](https://eprint.iacr.org/2014/760.pdf).
 - [ ] Mitscha-Baude's [reduced-radix FIOS method](https://github.com/mitschabaude/montgomery/blob/main/doc/zprize22.md#13-x-30-bit-multiplication).
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
 - [ ] Montgomery squaring variants of all of the above algorithms.
+
+### BH23
+
+Achieves minor performance gains over the classic CIOS method by Acar by
+skipping certain steps of the algorithm if highest word of the prime modulus
+meets a certain condition, which the BN254 scalar field order satisfies. 
 
 ### BM17
 

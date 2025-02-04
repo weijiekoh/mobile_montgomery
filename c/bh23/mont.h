@@ -8,14 +8,13 @@ static inline uint64_t lo(uint64_t v) {
     return v & LIMB_MASK;
 }
 
-/// Amine Mrabet, Nadia El-Mrabet, Ronan Lashermes, Jean-Baptiste Rigaud, Belgacem Bouallegue, et
-/// al.. High-performance Elliptic Curve Cryptography by Using the CIOS Method for Modular
-/// Multiplication. CRiSIS 2016, Sep 2016, Roscoff, France. hal-01383162
-/// https://inria.hal.science/hal-01383162/document, page 4
-/// Also see Acar, 1996.
-/// This is the "classic" CIOS algorithm.
-/// Does not implement the gnark optimisation (https://hackmd.io/@gnark/modular_multiplication),
-/// but that should be useful.
+/// Gautam Botrel and Youssef El Housni. Faster Montgomery multiplication and
+/// Multi-Scalar-Multiplication for SNARKs. IACR Transactions on Cryptographic
+/// Hardware and Embedded Systems ISSN 2569-2925, Vol. 2023, No. 3, pp.
+/// 504–521. DOI:10.46586/tches.v2023.i3.504-521
+/// https://tches.iacr.org/index.php/TCHES/article/view/10972/10279
+/// This is Acar's CIOS algorithm with the "gnark optimisation":
+/// (https://hackmd.io/@gnark/modular_multiplication),
 /// Does not use SIMD instructions.
 BigInt mont_mul(
     BigInt *ar,
@@ -23,20 +22,18 @@ BigInt mont_mul(
     BigInt *p,
     uint64_t n0
 ) {
-    uint64_t t[NUM_LIMBS + 2] = {0};
+    uint64_t t[NUM_LIMBS + 1] = {0};
 
     for (int i = 0; i < NUM_LIMBS; i ++) {
         uint64_t c = 0;
         uint64_t cs;
         for (int j = 0; j < NUM_LIMBS; j ++) {
-            cs = t[j] + ar->v[i] * br->v[j] + c;
+            cs = t[j] + ar->v[j] * br->v[i] + c;
             c = hi(cs);
             t[j] = lo(cs);
         }
-        cs = t[NUM_LIMBS] + c;
-        c = hi(cs);
-        t[NUM_LIMBS] = lo(cs);
-        t[NUM_LIMBS + 1] = c;
+        t[NUM_LIMBS] = c;
+        c = 0;
 
         uint64_t m = (t[0] * n0) & LIMB_MASK;
         cs = t[0] + m * p->v[0];
@@ -48,14 +45,12 @@ BigInt mont_mul(
             t[j - 1] = lo(cs);
         }
 
-        cs = t[NUM_LIMBS] + c;
-        c = hi(cs);
-        t[NUM_LIMBS - 1] = lo(cs);
-        t[NUM_LIMBS] = t[NUM_LIMBS + 1] + c;
+        t[NUM_LIMBS - 1] = t[NUM_LIMBS] + c;
     }
+    t[NUM_LIMBS] = 0;
 
     bool t_gt_p = false;
-    for (int idx = 0; idx < NUM_LIMBS + 1; idx ++) {
+    for (int idx = 0; idx < NUM_LIMBS; idx ++) {
         int i = NUM_LIMBS - idx;
         uint64_t pi = 0;
         if (i < NUM_LIMBS) {
@@ -79,17 +74,12 @@ BigInt mont_mul(
         return res;
     }
 
-    uint64_t t_wide[NUM_LIMBS + 1] = {0};
-    for (int i = 0; i < NUM_LIMBS + 1; i ++) {
-        t_wide[i] = t[i];
-    }
-
-    uint64_t result[NUM_LIMBS + 1] = {0};
+    uint64_t result[NUM_LIMBS] = {0};
     uint64_t borrow = 0;
     const uint64_t limb_mask = 4294967295;
 
     for (int i = 0; i < NUM_LIMBS + 1; i ++) {
-        uint64_t lhs_limb = t_wide[i];
+        uint64_t lhs_limb = t[i];
         uint64_t rhs_limb = 0;
         if (i < NUM_LIMBS) {
             rhs_limb = p->v[i];

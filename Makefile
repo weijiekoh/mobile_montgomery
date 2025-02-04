@@ -14,7 +14,7 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_bm17_mont tests_bm17_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_bh23_mont tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
 
 run_tests:
 	run_tests_simd_sse4.1
@@ -83,6 +83,26 @@ tests_acar_mont_neon:
 run_tests_acar_mont_neon:
 	build/tests/acar/mont_neon
 
+## tests/bh23/mont
+tests_bh23_mont: N := mont
+tests_bh23_mont:
+	mkdir -p build/tests/bh23
+	echo $(CC) $(CFLAGS) tests/bh23/$(N).c -o build/tests/bh23/$(N)
+	$(CC) $(CFLAGS) tests/bh23/$(N).c -o build/tests/bh23/$(N)
+
+run_tests_bh23_mont:
+	build/tests/bh23/mont
+
+## tests/bh23/mont_neon
+tests_bh23_mont_neon: N := mont
+tests_bh23_mont_neon:
+	mkdir -p build/tests/bh23
+	echo $(ARM_CC) $(CFLAGS_NEON) tests/bh23/$(N).c -o build/tests/bh23/$(N)_neon
+	$(ARM_CC) $(CFLAGS_NEON) tests/bh23/$(N).c -o build/tests/bh23/$(N)_neon
+
+run_tests_bh23_mont_neon:
+	build/tests/bh23/mont_neon
+
 ## tests/bm17/mont
 tests_bm17_mont: N := mont
 tests_bm17_mont:
@@ -101,7 +121,7 @@ tests_bm17_mont_neon:
 	$(ARM_CC) $(CFLAGS_NEON) tests/bm17/$(N).c -o build/tests/bm17/$(N)_neon
 
 # Benchmarks
-benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_bm17 benchmarks_bm17_neon
+benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bm17 benchmarks_bm17_neon
 
 run_benchmarks:
 	build/benchmarks/acar/benchmark
@@ -133,6 +153,25 @@ benchmarks_acar_neon:
 
 run_benchmarks_acar_neon:
 	build/benchmarks/acar/benchmark_neon
+
+# BH23
+benchmarks_bh23: N := benchmark
+benchmarks_bh23:
+	mkdir -p build/benchmarks/bh23
+	echo $(CC) $(CFLAGS) benchmarks/bh23/$(N).c -o build/benchmarks/bh23/$(N)
+	$(CC) $(CFLAGS) benchmarks/bh23/$(N).c -o build/benchmarks/bh23/$(N)
+
+run_benchmarks_bh23:
+	build/benchmarks/bh23/benchmark
+
+benchmarks_bh23_neon: N := benchmark
+benchmarks_bh23_neon:
+	mkdir -p build/benchmarks/bh23	
+	echo $(ARM_CC) $(CFLAGS_NEON) benchmarks/bh23/$(N).c -o build/benchmarks/bh23/$(N)_neon
+	$(ARM_CC) $(CFLAGS_NEON) benchmarks/bh23/$(N).c -o build/benchmarks/bh23/$(N)_neon
+
+run_benchmarks_bh23_neon:
+	build/benchmarks/bh23/benchmark_neon
 
 ## BM17
 benchmarks_bm17: N := benchmark
