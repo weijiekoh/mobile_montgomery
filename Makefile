@@ -17,11 +17,12 @@ clean:
 tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_bh23_mont tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
 
 run_tests:
-	run_tests_simd_sse4.1
-	emulate_tests_simd_neon
+	build/tests/simd_sse4.1
+	build/tests/simd_neon
 	build/tests/bigints/bigint_8x32/bigint
 	build/tests/acar/mont
 	build/tests/bm17/mont
+	build/tests/bh23/mont
 
 
 ## tests/simd
