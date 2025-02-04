@@ -78,7 +78,7 @@ BigInt mont_mul(
     uint64_t borrow = 0;
     const uint64_t limb_mask = 4294967295;
 
-    for (int i = 0; i < NUM_LIMBS + 1; i ++) {
+    for (int i = 0; i < NUM_LIMBS; i ++) {
         uint64_t lhs_limb = t[i];
         uint64_t rhs_limb = 0;
         if (i < NUM_LIMBS) {

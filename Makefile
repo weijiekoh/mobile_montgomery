@@ -129,6 +129,7 @@ run_benchmarks:
 
 run_benchmarks_neon:
 	build/benchmarks/acar/benchmark_neon
+	build/benchmarks/bh23/benchmark_neon
 	build/benchmarks/bm17/benchmark_neon
 
 emulate_benchmarks_neon:
