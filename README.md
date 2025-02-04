@@ -39,6 +39,7 @@ The following algorithms are not yet implemented:
 | Acar (CIOS)         | Done  | TODO | N/A  | TODO     |                                                       |
 | BH23                | Done  | TODO | N/A  | TODO     | The gnark-optimised version of CIOS.                  |
 | BM17                | TODO  | Done | Yes  | TODO     | Uses NEON vector instructions.                        |
+| SLGCK14             | TODO  | TODO | Y    | TODO     | Optimisations to BM17.                                |
 | Yuval Domb CIOS     | TODO  | TODO | N    | TODO     |                                                       |
 | EZW18               | TODO  | TODO | ?    | TODO     | Emmart's method. Requires floating-point `madd`.      |
 | Mitscha-Baude       | TODO  | TODO | N    | TODO     | Reduced-radix FIOS                                    |
@@ -53,6 +54,10 @@ meets a certain condition, which the BN254 scalar field order satisfies.
 
 The key optimisation in BM17 is its use of NEON vector instructions to perform identical arithmetic steps of the interleaved  ,
 particularly the `vmlal_u32` instruction, which performs 2-lane multiply-and-add operations.
+
+## Potential research directions
+
+- Combine Emmart's method with BM17 or SLGCK14. Emmart's method only uses one out of two available lanes, and it's possible that multiplications in BM17 can be achieved via the floating-point trick. Furthermore, the larger limb size may provide a speedup.
 
 ## Quick start
 
@@ -76,6 +81,8 @@ following binaries to the device, and run them.
 ```
 build/benchmarks/acar/benchmark_neon
 build/benchmarks/bm17/benchmark_neon
+build/benchmarks/bh23/benchmark_neon
+# ... and so on
 ```
 
 They have been tested with a Raspberry Pi 5, specifically the CanaKit 8GB version.

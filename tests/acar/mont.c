@@ -42,8 +42,9 @@ MU_TEST(test_mont_mul) {
         // Perform mont mul
         abr = mont_mul(&ar, &br, &p, n0);
 
-        char *abr_hex = bigint_to_hex(&abr);
+        mu_check(bigint_eq(&abr, &expected));
 
+        char *abr_hex = bigint_to_hex(&abr);
         mu_check(strcmp(abr_hex, c_hex) == 0);
     }
 }

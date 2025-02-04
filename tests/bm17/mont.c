@@ -65,10 +65,8 @@ MU_TEST(test_mont_mul_bls12_377_scalar) {
 
     char *abr_hex = bigint_to_hex(&abr);
 
-    /*printf("%s\n", ar_hex);*/
-    /*printf("%s\n", br_hex);*/
-    /*printf("%s\n", abr_hex);*/
-    /*printf("expected_hex: %s\n", expected_hex);*/
+    mu_check(bigint_eq(&abr, &expected));
+
     mu_check(strcmp(abr_hex, expected_hex) == 0);
 }
 
