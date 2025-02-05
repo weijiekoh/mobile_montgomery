@@ -3,9 +3,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define NUM_LIMBS 8
-#define BITS_PER_LIMB 32
-#define LIMB_MASK 0xFFFFFFFF
+#define NUM_LIMBS 5
+#define BITS_PER_LIMB 51
+#define LIMB_MASK 0X7FFFFFFFFFFFF
 
 // Includes all the BigInt-related functions (excluding Montgomery
 // multiplication). To use them, just include this file.

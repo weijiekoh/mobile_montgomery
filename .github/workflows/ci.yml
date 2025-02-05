@@ -1,0 +1,23 @@
+name: C CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install dependencies
+      run:  sudo apt install gcc-aarch64-linux-gnu qemu-user qemu-user-static
+    - name: make
+      run: make
+    - name: Run tests
+      run: make run_tests #&& make emulate_tests
+    - name: Run benchmarks
+      run: make run_benchmarks #&& make emulate_benchmarks_neon

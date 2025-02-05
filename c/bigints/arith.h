@@ -2,7 +2,10 @@
  * Returns a new BigInt initialized to zero.
  */
 BigInt bigint_new() {
-    BigInt result = {{0, 0, 0, 0, 0, 0, 0, 0}}; // Initialize all elements to zero
+    BigInt result;
+    for (int i = 0; i < NUM_LIMBS; i++) {
+        result.v[i] = 0;
+    }
     return result;
 }
 

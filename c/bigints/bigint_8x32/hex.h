@@ -1,11 +1,15 @@
 #include <string.h>
 
+/*
+ * Convert a BigInt to a 65-character big-endian hexadecimal string, with a null terminator.
+ */
 char* bigint_to_hex(const BigInt *val) {
     static char hex_str[65];  // static buffer
 
-    for (int i = 0; i < 8; i++) {
-        uint32_t limb = (uint32_t)(val->v[7 - i] & 0xFFFFFFFFULL);
-        sprintf(hex_str + i * 8, "%08x", limb);
+    long long mask = 0xFFFFFFFFULL;
+    for (int i = 0; i < NUM_LIMBS; i++) {
+        uint32_t limb = (uint32_t)(val->v[NUM_LIMBS - 1 - i] & mask);
+        sprintf(hex_str + i * NUM_LIMBS, "%08x", limb);
     }
 
     hex_str[64] = '\0';
@@ -50,7 +54,7 @@ int bigint_from_hex(const char *hex_str, BigInt *val) {
     }
 
     // Process each limb
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < NUM_LIMBS; i++) {
         // Get the substring for this limb
         const char *limb_str = hex_str + i * 8;
         uint32_t limb_value;
@@ -61,9 +65,8 @@ int bigint_from_hex(const char *hex_str, BigInt *val) {
         }
 
         // Since limbs are stored in little-endian order, assign in reverse
-        val->v[7 - i] = (uint64_t)limb_value;
+        val->v[NUM_LIMBS - 1 - i] = (uint64_t)limb_value;
     }
 
     return 0; // Success
 }
-
