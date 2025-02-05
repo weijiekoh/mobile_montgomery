@@ -43,6 +43,7 @@ BigInt bigint_sub(
 ) {
     BigInt res = bigint_new();
     uint64_t borrow = 0;
+
     uint64_t diff;
 
     for (int i = 0; i < NUM_LIMBS; i ++) {

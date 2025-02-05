@@ -86,7 +86,6 @@ BigInt mont_mul(
 
     uint64_t result[NUM_LIMBS + 1] = {0};
     uint64_t borrow = 0;
-    const uint64_t limb_mask = 4294967295;
 
     for (int i = 0; i < NUM_LIMBS + 1; i ++) {
         uint64_t lhs_limb = t_wide[i];
@@ -95,7 +94,7 @@ BigInt mont_mul(
             rhs_limb = p->v[i];
         }
         uint64_t diff = lhs_limb - rhs_limb - borrow;
-        result[i] = diff & limb_mask;
+        result[i] = diff & LIMB_MASK;
         borrow = (diff >> BITS_PER_LIMB) & 1;
     }
 

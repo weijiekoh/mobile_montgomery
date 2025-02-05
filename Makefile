@@ -50,7 +50,7 @@ emulate_tests_simd_neon:
 	$(EMULATOR) build/tests/simd_neon
 
 ## tests/bigints
-tests_bigints: tests_bigints_bigint_8x32 tests_bigints_bigint_5x51
+tests_bigints: tests_bigints_bigint_8x32 tests_bigints_bigint_4x64 tests_bigints_bigint_5x51
 
 ### tests/bigints/bigint_8x32
 tests_bigints_bigint_8x32: N := bigint
@@ -60,6 +60,15 @@ tests_bigints_bigint_8x32:
 
 run_tests_bigints_bigint_8x32:
 	build/tests/bigints/bigint_8x32/bigint
+
+### tests/bigints/bigint_4x64
+tests_bigints_bigint_4x64: N := bigint
+tests_bigints_bigint_4x64:
+	mkdir -p build/tests/bigints/bigint_4x64
+	$(CC) $(CFLAGS) tests/bigints/bigint_4x64/$(N).c -o build/tests/bigints/bigint_4x64/$(N)
+
+run_tests_bigints_bigint_4x64:
+	build/tests/bigints/bigint_4x64/bigint
 	
 ### tests/bigints/bigint_5x51
 tests_bigints_bigint_5x51: N := bigint
