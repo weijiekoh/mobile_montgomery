@@ -6,12 +6,11 @@
 typedef __m64 i64;
 
 // 64x2 128-bit SIMD registers
-typedef __m128d f128;
 typedef __m128i i128;
 
-inline i64 i64_zero() { return _mm_setzero_si64(); }
-inline f128 f128_zero() { return _mm_setzero_pd(); }
-inline i128 i128_zero() { return _mm_setzero_si128(); }
+// Returns zero values
+static inline i64 i64_zero() { return _mm_setzero_si64(); }
+static inline i128 i128_zero() { return _mm_setzero_si128(); }
 
 /*
  * Returns the i64 value containing the concatenation of hi and lo.
@@ -130,22 +129,38 @@ i128 madd(i128 a, i64 b, i64 c) {
     return i64x2_make(res_hi, res_lo);
 }
 
-
+// Floating-point SIMD
 /*
- * Add each lane of the 64x2 and 32x2 vectors and store the result in a 64x2 vector.
+ * Print the binary representation of an f128 (f0f1) as such:
+ * "(f0: <sign> <exp minus 1023 in decimal> <mantissa in hex>, f1: <sign> <exp
+ * minus 1023 in decimal> <mantissa in hex>)"
  */
-//static inline i128 vaddw_u32(i128 a, i64 b) {
-    //// Extract the lower and higher 32-bit lanes from b.
-    //uint32_t b_lo = i32x2_extract_l(b);
-    //uint32_t b_hi = i32x2_extract_h(b);
+void print_f128(i128 in) {
+    unsigned long long f0, f1;
+    uint8_t sign0, sign1;
+    uint32_t exp0, exp1;
+    uint64_t mantissa0, mantissa1;
 
-    //// Zero-extend the 32-bit values to 64-bit.
-    //uint64_t b_lo64 = (uint64_t)b_lo;
-    //uint64_t b_hi64 = (uint64_t)b_hi;
+    f0 = i64x2_extract_l(in);
+    f1 = i64x2_extract_h(in);
 
-    //// Pack the extended values into a 64x2 vector.
-    //i128 wide_b = i64x2_make(b_hi64, b_lo64);
+    sign0 = f0 >> 63;
+    sign1 = f1 >> 63;
 
-    //// Add the 64-bit lanes of a and wide_b.
-    //return i64x2_add(a, wide_b);
-//}
+    uint64_t mantissa_mask = 0xfffffffffffff;
+    exp0 = ((f0 >> 52) & 0x7ff) - 1023;
+    exp1 = ((f1 >> 52) & 0x7ff) - 1023;
+
+    mantissa0 = f0 & mantissa_mask;
+    mantissa1 = f1 & mantissa_mask;
+
+    char sign0_char, sign1_char;
+
+    sign0_char = sign0 == 0 ? '+' : '-';
+    sign1_char = sign1 == 0 ? '+' : '-';
+
+    printf(
+        "(%c %d %013lx, %c %d %013lx)",
+        sign0_char, exp0, mantissa0, sign1_char, exp1, mantissa1
+    );
+}
