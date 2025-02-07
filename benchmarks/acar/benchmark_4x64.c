@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include "../time.h"
-#include "../../c/bigints/bigint_8x32/bigint.h"
-#include "../../c/bigints/bigint_8x32/hex.h"
-#include "../../c/acar/mont.h"
+#include "../../c/bigints/bigint_4x64/bigint.h"
+#include "../../c/bigints/bigint_4x64/hex.h"
+#include "../../c/acar/mont_4x64.h"
 #include "../data/benchmark_mont_data.h"
 
 BigInt reference_func(
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     assert(result == 0);
 
     int num_runs = 5;
-    uint64_t n0 = 4026531839;
+    uint64_t n0 = 0xc2e1f593efffffff;
 
     for (int i = 0; i < length; i++) {
         int cost = data[i].cost;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         }
         avg /= num_runs;
 
-        printf("%d Mont muls with Acar's CIOS method (non-SIMD, 32-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
+        printf("%d Mont muls with Acar's CIOS method (non-SIMD, 64-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
 
         assert(bigint_eq(&expected, &c));
     }

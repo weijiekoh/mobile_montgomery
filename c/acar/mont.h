@@ -11,7 +11,7 @@ static inline uint64_t lo(uint64_t v) {
 /// Amine Mrabet, Nadia El-Mrabet, Ronan Lashermes, Jean-Baptiste Rigaud, Belgacem Bouallegue, et
 /// al.. High-performance Elliptic Curve Cryptography by Using the CIOS Method for Modular
 /// Multiplication. CRiSIS 2016, Sep 2016, Roscoff, France. hal-01383162
-/// https://inria.hal.science/hal-01383162/document, page 4
+/// https://inria.hal.science/hal-01383162/document , page 4
 /// Also see Acar, 1996.
 /// This is the "classic" CIOS algorithm.
 /// Does not implement the gnark optimisation (https://hackmd.io/@gnark/modular_multiplication),
@@ -25,9 +25,10 @@ BigInt mont_mul(
 ) {
     uint64_t t[NUM_LIMBS + 2] = {0};
 
+    uint64_t c = 0;
+    uint64_t cs;
     for (int i = 0; i < NUM_LIMBS; i ++) {
-        uint64_t c = 0;
-        uint64_t cs;
+        c = 0;
         for (int j = 0; j < NUM_LIMBS; j ++) {
             cs = t[j] + ar->v[i] * br->v[j] + c;
             c = hi(cs);
