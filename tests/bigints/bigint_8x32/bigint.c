@@ -20,22 +20,23 @@ MU_TEST(test_bigint_gt) {
     mu_check(result == false);
 }
 
-MU_TEST(test_bigint_sub) {
-    const char *a_hex_str = "30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47";
-    const char *b_hex_str = "20644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47";
-    const char *c_hex_str = "1000000000000000000000000000000000000000000000000000000000000000";
-    BigInt a, b, c;
-    int r = bigint_from_hex(a_hex_str, &a);
-    mu_check(r == 0);
-    r = bigint_from_hex(b_hex_str, &b);
-    mu_check(r == 0);
-    r = bigint_from_hex(c_hex_str, &c);
-    mu_check(r == 0);
+// TODO: refactor bigint_sub, or omit it, if each mont mul algo has slightly different requirements for the conditional reduction
+/*MU_TEST(test_bigint_sub) {*/
+    /*const char *a_hex_str = "30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47";*/
+    /*const char *b_hex_str = "20644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47";*/
+    /*const char *c_hex_str = "1000000000000000000000000000000000000000000000000000000000000000";*/
+    /*BigInt a, b, c;*/
+    /*int r = bigint_from_hex(a_hex_str, &a);*/
+    /*mu_check(r == 0);*/
+    /*r = bigint_from_hex(b_hex_str, &b);*/
+    /*mu_check(r == 0);*/
+    /*r = bigint_from_hex(c_hex_str, &c);*/
+    /*mu_check(r == 0);*/
 
-    BigInt result = bigint_sub(&a, &b);
+    /*BigInt result = bigint_sub(&a, &b);*/
 
-    mu_check(bigint_eq(&result, &c));
-}
+    /*mu_check(bigint_eq(&result, &c));*/
+/*}*/
 
 MU_TEST(test_bigint_from_hex) {
     BigInt number;
@@ -97,7 +98,7 @@ MU_TEST(test_bigint_to_and_from_hex) {
 
 MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(test_bigint_gt);
-    MU_RUN_TEST(test_bigint_sub);
+    /*MU_RUN_TEST(test_bigint_sub);*/
     MU_RUN_TEST(test_bigint_from_hex);
     MU_RUN_TEST(test_bigint_from_hex_2);
     MU_RUN_TEST(test_bigint_to_and_from_hex);

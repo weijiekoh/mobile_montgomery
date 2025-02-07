@@ -14,13 +14,14 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_bh23_mont tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
 
 run_tests:
 	build/tests/simd_sse4.1
 	build/tests/simd_neon
 	build/tests/bigints/bigint_8x32/bigint
 	build/tests/acar/mont
+	build/tests/acar/mont_4x64
 	build/tests/bm17/mont
 	build/tests/bh23/mont
 
@@ -88,6 +89,24 @@ tests_acar_mont:
 run_tests_acar_mont:
 	build/tests/acar/mont
 
+## tests/acar/mont_4x64
+tests_acar_mont_4x64: N := mont_4x64
+tests_acar_mont_4x64:
+	mkdir -p build/tests/acar
+	$(CC) $(CFLAGS) tests/acar/$(N).c -o build/tests/acar/$(N)
+
+run_tests_acar_mont_4x64:
+	build/tests/acar/mont_4x64
+
+## tests/acar/mont_4x64_neon
+tests_acar_mont_4x64_neon: N := mont_4x64
+tests_acar_mont_4x64_neon:
+	mkdir -p build/tests/acar
+	$(ARM_CC) $(CFLAGS_NEON) tests/acar/$(N).c -o build/tests/acar/$(N)_neon
+
+emulate_tests_acar_mont_4x64_neon:
+	$(EMULATOR) build/tests/acar/mont_4x64_neon
+
 ## tests/acar/mont_neon
 tests_acar_mont_neon: N := mont
 tests_acar_mont_neon:
@@ -131,7 +150,7 @@ tests_bm17_mont_neon:
 	$(ARM_CC) $(CFLAGS_NEON) tests/bm17/$(N).c -o build/tests/bm17/$(N)_neon
 
 # Benchmarks
-benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bm17 benchmarks_bm17_neon
+benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bm17 benchmarks_bm17_neon
 
 run_benchmarks:
 	build/benchmarks/acar/benchmark
@@ -162,6 +181,22 @@ benchmarks_acar_neon:
 
 run_benchmarks_acar_neon:
 	build/benchmarks/acar/benchmark_neon
+
+benchmarks_acar_4x64: N := benchmark_4x64
+benchmarks_acar_4x64:
+	mkdir -p build/benchmarks/acar
+	$(CC) $(CFLAGS) benchmarks/acar/$(N).c -o build/benchmarks/acar/$(N)
+
+run_benchmarks_acar_4x64:
+	build/benchmarks/acar/benchmark_4x64
+
+benchmarks_acar_4x64_neon: N := benchmark_4x64
+benchmarks_acar_4x64_neon:
+	mkdir -p build/benchmarks/acar
+	$(ARM_CC) $(CFLAGS_NEON) benchmarks/acar/$(N).c -o build/benchmarks/acar/$(N)_neon
+
+run_benchmarks_acar_4x64_neon:
+	build/benchmarks/acar/benchmark_4x64_neon
 
 # BH23
 benchmarks_bh23: N := benchmark
