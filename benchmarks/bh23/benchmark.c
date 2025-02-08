@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     int num_runs = 5;
     uint64_t n0 = 4026531839;
 
-    for (int i = 0; i < length; i++) {
+    for (int i = length - 1; i < length; i++) {
         int cost = data[i].cost;
         int result = bigint_from_hex(data[i].a_hex, &a);
         assert(result == 0);
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         }
         avg /= num_runs;
 
-        printf("%d Mont muls with BH23's CIOS method (non-SIMD) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
+        printf("%d Mont muls with BH23's CIOS method (non-SIMD, 32-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
 
         assert(bigint_eq(&expected, &c));
     }

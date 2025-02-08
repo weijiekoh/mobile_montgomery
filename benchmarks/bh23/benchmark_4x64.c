@@ -3,7 +3,7 @@
 #include "../time.h"
 #include "../../c/bigints/bigint_4x64/bigint.h"
 #include "../../c/bigints/bigint_4x64/hex.h"
-#include "../../c/acar/mont_4x64.h"
+#include "../../c/bh23/mont_4x64.h"
 #include "../data/benchmark_mont_data.h"
 
 BigInt reference_func(
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         }
         avg /= num_runs;
 
-        printf("%d Mont muls with Acar's CIOS method (non-SIMD, 64-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
+        printf("%d Mont muls with BH23's CIOS method (non-SIMD, 64-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
 
         assert(bigint_eq(&expected, &c));
     }
