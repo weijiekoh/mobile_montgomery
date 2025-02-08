@@ -34,15 +34,18 @@ The following algorithms are not yet implemented:
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
 - [ ] Montgomery squaring variants of all of the above algorithms.
 
-| Algorithm           | ARM32 | ARM64 | NEON | Squaring | Notes                                                |
+| Algorithm           | 32-bit limbs | 64-bit limbs | NEON | Squaring | Notes                                                 |
 |-|-|-|-|-|-|
-| Acar (CIOS)         | Done  | TODO | N/A  | TODO     |                                                       |
-| BH23                | Done  | TODO | N/A  | TODO     | The gnark-optimised version of CIOS.                  |
-| BM17                | TODO  | Done | Yes  | TODO     | Uses NEON vector instructions.                        |
-| SLGCK14             | TODO  | TODO | Y    | TODO     | Optimisations to BM17.                                |
-| Yuval Domb CIOS     | TODO  | TODO | N    | TODO     |                                                       |
-| EZW18               | TODO  | TODO | ?    | TODO     | Emmart's method. Requires floating-point `madd`.      |
-| Mitscha-Baude       | TODO  | TODO | N    | TODO     | Reduced-radix FIOS                                    |
+| Acar (CIOS)         | Done         | Done         | N/A  | TODO     |                                                       |
+| BH23                | Done         | Done         | N/A  | TODO     | The gnark-optimised version of CIOS.                  |
+| BM17                | Done         | TODO         | Yes  | TODO     | Uses NEON vector instructions.                        |
+| SLGCK14             | TODO         | TODO         | Y    | TODO     | Optimisations to BM17.                                |
+| Yuval Domb CIOS     | TODO         | TODO         | TODO | TODO     |                                                       |
+| EZW18               | TODO         | TODO         | ?    | TODO     | Emmart's method. Requires floating-point `madd`.      |
+
+| Algorithm           | 29-bit limbs | 30-bit limbs | NEON | Squaring | Notes                                                 |
+|-|-|-|-|-|-|
+| Mitscha-Baude       | TODO         | TODO         | TODO | TODO     | Reduced-radix FIOS                                    |
 
 ### BH23
 
@@ -52,12 +55,16 @@ meets a certain condition, which the BN254 scalar field order satisfies.
 
 ### BM17
 
-The key optimisation in BM17 is its use of NEON vector instructions to perform identical arithmetic steps of the interleaved  ,
-particularly the `vmlal_u32` instruction, which performs 2-lane multiply-and-add operations.
+The key optimisation in BM17 is its use of NEON vector instructions to perform
+identical arithmetic steps of the interleaved  , particularly the `vmlal_u32`
+instruction, which performs 2-lane multiply-and-add operations.
 
 ## Potential research directions
 
-- Combine Emmart's method with BM17 or SLGCK14. Emmart's method only uses one out of two available lanes, and it's possible that multiplications in BM17 can be achieved via the floating-point trick. Furthermore, the larger limb size may provide a speedup.
+- Combine Emmart's method with BM17 or SLGCK14. Emmart's method only uses one
+  out of two available lanes, and it's possible that multiplications in BM17
+  can be achieved via the floating-point trick. Furthermore, the larger limb
+  size may provide a speedup.
 
 ## Quick start
 

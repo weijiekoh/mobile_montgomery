@@ -14,7 +14,7 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_4x64 tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
 
 run_tests:
 	build/tests/simd_sse4.1
@@ -24,6 +24,7 @@ run_tests:
 	build/tests/acar/mont_4x64
 	build/tests/bm17/mont
 	build/tests/bh23/mont
+	build/tests/bh23/mont_4x64
 
 
 ## tests/simd
@@ -125,6 +126,15 @@ tests_bh23_mont:
 run_tests_bh23_mont:
 	build/tests/bh23/mont
 
+## tests/bh23/mont_4x64
+tests_bh23_mont_4x64: N := mont_4x64
+tests_bh23_mont_4x64:
+	mkdir -p build/tests/bh23
+	$(CC) $(CFLAGS) tests/bh23/$(N).c -o build/tests/bh23/$(N)
+
+run_tests_bh23_mont_4x64:
+	build/tests/bh23/mont_4x64
+
 ## tests/bh23/mont_neon
 tests_bh23_mont_neon: N := mont
 tests_bh23_mont_neon:
@@ -150,11 +160,14 @@ tests_bm17_mont_neon:
 	$(ARM_CC) $(CFLAGS_NEON) tests/bm17/$(N).c -o build/tests/bm17/$(N)_neon
 
 # Benchmarks
-benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bm17 benchmarks_bm17_neon
+benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bh23_4x64 benchmarks_bh23_4x64_neon benchmarks_bm17 benchmarks_bm17_neon
 
 run_benchmarks:
 	build/benchmarks/acar/benchmark
+	build/benchmarks/acar/benchmark_4x64
 	build/benchmarks/bm17/benchmark
+	build/benchmarks/bh23/benchmark
+	build/benchmarks/bh23/benchmark_4x64
 
 run_benchmarks_neon:
 	build/benchmarks/acar/benchmark_neon
@@ -163,7 +176,10 @@ run_benchmarks_neon:
 
 emulate_benchmarks_neon:
 	$(EMULATOR) build/benchmarks/acar/benchmark_neon
+	$(EMULATOR) build/benchmarks/acar/benchmark_4x64_neon
 	$(EMULATOR) build/benchmarks/bm17/benchmark_neon
+	$(EMULATOR) build/benchmarks/bh23/benchmark_neon
+	$(EMULATOR) build/benchmarks/bh23/benchmark_4x64_neon
 
 ## Acar
 benchmarks_acar: N := benchmark
@@ -214,6 +230,22 @@ benchmarks_bh23_neon:
 
 run_benchmarks_bh23_neon:
 	build/benchmarks/bh23/benchmark_neon
+
+benchmarks_bh23_4x64: N := benchmark_4x64
+benchmarks_bh23_4x64:
+	mkdir -p build/benchmarks/bh23
+	$(CC) $(CFLAGS) benchmarks/bh23/$(N).c -o build/benchmarks/bh23/$(N)
+
+run_benchmarks_bh23_4x64:
+	build/benchmarks/bh23/benchmark_4x64
+
+benchmarks_bh23_4x64_neon: N := benchmark_4x64
+benchmarks_bh23_4x64_neon:
+	mkdir -p build/benchmarks/bh23
+	$(ARM_CC) $(CFLAGS_NEON) benchmarks/bh23/$(N).c -o build/benchmarks/bh23/$(N)_neon
+
+run_benchmarks_bh23_4x64_neon:
+	build/benchmarks/bh23/benchmark_4x64_neon
 
 ## BM17
 benchmarks_bm17: N := benchmark

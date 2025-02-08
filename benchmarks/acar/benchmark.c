@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     int num_runs = 5;
     uint64_t n0 = 4026531839;
 
-    for (int i = 0; i < length; i++) {
+    for (int i = length - 1; i < length; i++) {
         int cost = data[i].cost;
         int result = bigint_from_hex(data[i].a_hex, &a);
         assert(result == 0);
