@@ -59,6 +59,19 @@ The key optimisation in BM17 is its use of NEON vector instructions to perform
 identical arithmetic steps of the interleaved  , particularly the `vmlal_u32`
 instruction, which performs 2-lane multiply-and-add operations.
 
+## Preliminary results
+
+The following benchmarks of 2^20 sequential Montgomery multiplications over the
+BN254 scalar field were run on the Raspberry Pi 5 (ARM Cortex-A76):
+
+| Algorithm | Limb size | Time taken (ms) |
+|-----------|-----------|-----------------|
+| Acar      | 32 bits   | 208             |
+| Acar      | 64 bits   | 114             |
+| BH23      | 32 bits   | 200             |
+| BH23      | 64 bits   | 110             |
+| BM17      | 32 bits   | 137             |
+
 ## Potential research directions
 
 - Combine Emmart's method with BM17 or SLGCK14. Emmart's method only uses one
