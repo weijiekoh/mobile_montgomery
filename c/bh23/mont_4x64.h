@@ -59,6 +59,7 @@ BigInt mont_mul(
     mont_mul_no_reduce(ar, br, p, n0, t);
 
     uint128_t r;
+
     bool t_gt_p = false;
     for (int idx = 0; idx < NUM_LIMBS; idx ++) {
         int i = NUM_LIMBS - idx;
