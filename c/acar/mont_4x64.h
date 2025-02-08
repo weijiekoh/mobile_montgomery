@@ -1,26 +1,16 @@
 #include "../arith_uint128.h"
 
-/// Amine Mrabet, Nadia El-Mrabet, Ronan Lashermes, Jean-Baptiste Rigaud, Belgacem Bouallegue, et
-/// al.. High-performance Elliptic Curve Cryptography by Using the CIOS Method for Modular
-/// Multiplication. CRiSIS 2016, Sep 2016, Roscoff, France. hal-01383162
-/// https://inria.hal.science/hal-01383162/document , page 4
-/// Also see Acar, 1996.
-/// This is the "classic" CIOS algorithm.
-/// Does not implement the gnark optimisation (https://hackmd.io/@gnark/modular_multiplication),
-/// but that should be useful.
-/// Does not use SIMD instructions.
-BigInt mont_mul(
+void mont_mul_no_reduce(
     BigInt *ar,
     BigInt *br,
     BigInt *p,
-    uint64_t n0
+    uint64_t n0,
+    uint64_t *t
 ) {
-    uint64_t t[NUM_LIMBS + 2] = {0};
-
+    uint128_t r;
     uint64_t c = 0;
     uint64_t s = 0;
     uint64_t m = 0;
-    uint128_t r;
 
     for (int i = 0; i < NUM_LIMBS; i ++) {
         c = 0;
@@ -59,6 +49,28 @@ BigInt mont_mul(
         t[NUM_LIMBS - 1] = s;
         t[NUM_LIMBS] = t[NUM_LIMBS + 1] + c;
     }
+}
+
+/// Amine Mrabet, Nadia El-Mrabet, Ronan Lashermes, Jean-Baptiste Rigaud, Belgacem Bouallegue, et
+/// al.. High-performance Elliptic Curve Cryptography by Using the CIOS Method for Modular
+/// Multiplication. CRiSIS 2016, Sep 2016, Roscoff, France. hal-01383162
+/// https://inria.hal.science/hal-01383162/document , page 4
+/// Also see Acar, 1996.
+/// This is the "classic" CIOS algorithm.
+/// Does not implement the gnark optimisation (https://hackmd.io/@gnark/modular_multiplication),
+/// but that should be useful.
+/// Does not use SIMD instructions.
+BigInt mont_mul(
+    BigInt *ar,
+    BigInt *br,
+    BigInt *p,
+    uint64_t n0
+) {
+    uint64_t t[NUM_LIMBS + 2] = {0};
+
+    mont_mul_no_reduce(ar, br, p, n0, t);
+
+    uint128_t r;
 
     bool t_gt_p = false;
     for (int idx = 0; idx < NUM_LIMBS + 1; idx ++) {

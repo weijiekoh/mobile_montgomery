@@ -61,16 +61,17 @@ instruction, which performs 2-lane multiply-and-add operations.
 
 ## Preliminary results
 
-The following benchmarks of 2^20 sequential Montgomery multiplications over the
-BN254 scalar field were run on the Raspberry Pi 5 (ARM Cortex-A76):
+The following benchmarks are of 2^20 sequential Montgomery multiplications over
+the BN254 scalar field were run on the Raspberry Pi 5 (ARM Cortex-A76). The
+final reduction is omittted.
 
 | Algorithm | Limb size | Time taken (ms) |
 |-----------|-----------|-----------------|
-| Acar      | 32 bits   | 208             |
-| Acar      | 64 bits   | 114             |
-| BH23      | 32 bits   | 200             |
-| BH23      | 64 bits   | 110             |
-| BM17      | 32 bits   | 137             |
+| Acar      | 32 bits   | 224             |
+| Acar      | 64 bits   | 104             |
+| BH23      | 32 bits   | 194             |
+| BH23      | 64 bits   | 104             |
+| BM17      | 32 bits   | 123             |
 
 ## Potential research directions
 

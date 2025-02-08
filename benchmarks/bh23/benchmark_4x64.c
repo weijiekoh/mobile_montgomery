@@ -1,13 +1,28 @@
 #include <stdio.h>
 #include <assert.h>
 #include "../time.h"
+#include "../black_box.h"
 #include "../../c/constants.h"
 #include "../../c/bigints/bigint_4x64/bigint.h"
 #include "../../c/bigints/bigint_4x64/hex.h"
 #include "../../c/bh23/mont_4x64.h"
 #include "../data/benchmark_mont_data.h"
 
-BigInt reference_func(
+DO_OPT // Allow optimisations for this function
+__attribute__((noinline))
+void optimised_mont_mul_no_reduce(
+    BigInt *ar,
+    BigInt *br,
+    BigInt *p,
+    uint64_t n0,
+    uint64_t *t
+) {
+    mont_mul_no_reduce(ar, br, p, n0, t);
+}
+
+// Unoptimised function to run the Montgomery multiplication without reduction `cost` times
+NO_OPT
+uint64_t reference_func(
     BigInt *a,
     BigInt *b,
     BigInt *p,
@@ -16,14 +31,12 @@ BigInt reference_func(
 ) {
     BigInt x = *a;
     BigInt y = *b;
-    BigInt z;
+    uint64_t t[NUM_LIMBS + 1] = {0};
 
     for (int i = 0; i < cost; i ++) {
-        z = mont_mul(&x, &y, p, n0);
-        x = y;
-        y = z;
+        optimised_mont_mul_no_reduce(&x, &y, p, n0, t);
     }
-    return y;
+    return black_box(t[0]);
 }
 
 int main(int argc, char *argv[]) {
@@ -33,7 +46,7 @@ int main(int argc, char *argv[]) {
     char* p_hex = BN254_SCALAR_HEX;
     uint64_t n0 = BN254_SCALAR_N0_4x64;
 
-    BigInt a, b, c, p, expected;
+    BigInt a, b, c, p;
 
     int result;
 
@@ -54,17 +67,13 @@ int main(int argc, char *argv[]) {
         double avg = 0;
         for (int i = 0; i < num_runs; i++) {
             double start = get_now_ms();
-            expected = reference_func(&a, &b, &p, n0, cost);
+            reference_func(&a, &b, &p, n0, cost);
             double end = get_now_ms();
             double elapsed = end - start;
-
-            /*printf("elapsed: %f; start: %f; end: %f\n", elapsed, start, end);*/
             avg += elapsed;
         }
         avg /= num_runs;
 
         printf("%d Mont muls with BH23's CIOS method (non-SIMD, 64-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
-
-        assert(bigint_eq(&expected, &c));
     }
 }

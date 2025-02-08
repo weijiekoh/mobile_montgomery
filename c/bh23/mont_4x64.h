@@ -1,21 +1,12 @@
 #include "../arith_uint128.h"
 
-/// Gautam Botrel and Youssef El Housni. Faster Montgomery multiplication and
-/// Multi-Scalar-Multiplication for SNARKs. IACR Transactions on Cryptographic
-/// Hardware and Embedded Systems ISSN 2569-2925, Vol. 2023, No. 3, pp.
-/// 504–521. DOI:10.46586/tches.v2023.i3.504-521
-/// https://tches.iacr.org/index.php/TCHES/article/view/10972/10279
-/// This is Acar's CIOS algorithm with the "gnark optimisation":
-/// (https://hackmd.io/@gnark/modular_multiplication),
-/// Does not use SIMD instructions.
-BigInt mont_mul(
+void mont_mul_no_reduce(
     BigInt *ar,
     BigInt *br,
     BigInt *p,
-    uint64_t n0
+    uint64_t n0,
+    uint64_t *t
 ) {
-    uint64_t t[NUM_LIMBS + 1] = {0};
-
     uint64_t c = 0;
     uint64_t s = 0;
     uint64_t m = 0;
@@ -47,7 +38,27 @@ BigInt mont_mul(
         t[NUM_LIMBS - 1] = t[NUM_LIMBS] + c;
     }
     t[NUM_LIMBS] = 0;
+}
 
+/// Gautam Botrel and Youssef El Housni. Faster Montgomery multiplication and
+/// Multi-Scalar-Multiplication for SNARKs. IACR Transactions on Cryptographic
+/// Hardware and Embedded Systems ISSN 2569-2925, Vol. 2023, No. 3, pp.
+/// 504–521. DOI:10.46586/tches.v2023.i3.504-521
+/// https://tches.iacr.org/index.php/TCHES/article/view/10972/10279
+/// This is Acar's CIOS algorithm with the "gnark optimisation":
+/// (https://hackmd.io/@gnark/modular_multiplication),
+/// Does not use SIMD instructions.
+BigInt mont_mul(
+    BigInt *ar,
+    BigInt *br,
+    BigInt *p,
+    uint64_t n0
+) {
+    uint64_t t[NUM_LIMBS + 1] = {0};
+
+    mont_mul_no_reduce(ar, br, p, n0, t);
+
+    uint128_t r;
     bool t_gt_p = false;
     for (int idx = 0; idx < NUM_LIMBS; idx ++) {
         int i = NUM_LIMBS - idx;

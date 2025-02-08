@@ -1,13 +1,31 @@
 #include <stdio.h>
 #include <assert.h>
 #include "../time.h"
+#include "../black_box.h"
 #include "../../c/constants.h"
 #include "../../c/bigints/bigint_8x32/bigint.h"
 #include "../../c/bigints/bigint_8x32/hex.h"
 #include "../../c/acar/mont.h"
 #include "../data/benchmark_mont_data.h"
 
-BigInt reference_func(
+// This benchmarking approach needs to change. It's a little hacky, and ideally
+// we should use something like the Rust Criterion library.
+
+DO_OPT // Allow optimisations for this function
+__attribute__((noinline))
+void optimised_mont_mul_no_reduce(
+    BigInt *ar,
+    BigInt *br,
+    BigInt *p,
+    uint64_t n0,
+    uint64_t *t
+) {
+    mont_mul_no_reduce(ar, br, p, n0, t);
+}
+
+// Unoptimised function to run the Montgomery multiplication without reduction `cost` times
+NO_OPT
+uint64_t reference_func(
     BigInt *a,
     BigInt *b,
     BigInt *p,
@@ -16,14 +34,12 @@ BigInt reference_func(
 ) {
     BigInt x = *a;
     BigInt y = *b;
-    BigInt z;
+    uint64_t t[NUM_LIMBS + 2] = {0};
 
     for (int i = 0; i < cost; i ++) {
-        z = mont_mul(&x, &y, p, n0);
-        x = y;
-        y = z;
+        optimised_mont_mul_no_reduce(&x, &y, p, n0, t);
     }
-    return y;
+    return black_box(t[0]);
 }
 
 int main(int argc, char *argv[]) {
@@ -33,7 +49,7 @@ int main(int argc, char *argv[]) {
     uint64_t n0 = BN254_SCALAR_N0_8x32;
     char* p_hex = BN254_SCALAR_HEX;
 
-    BigInt a, b, c, p, expected;
+    BigInt a, b, c, p;
 
     int result;
 
@@ -54,17 +70,13 @@ int main(int argc, char *argv[]) {
         double avg = 0;
         for (int i = 0; i < num_runs; i++) {
             double start = get_now_ms();
-            expected = reference_func(&a, &b, &p, n0, cost);
+            reference_func(&a, &b, &p, n0, cost);
             double end = get_now_ms();
             double elapsed = end - start;
-
-            /*printf("elapsed: %f; start: %f; end: %f\n", elapsed, start, end);*/
             avg += elapsed;
         }
         avg /= num_runs;
 
         printf("%d Mont muls with Acar's CIOS method (non-SIMD, 32-bit limbs) took: %f ms (avg over %d runs)\n", cost, avg, num_runs);
-
-        assert(bigint_eq(&expected, &c));
     }
 }

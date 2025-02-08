@@ -171,15 +171,17 @@ run_benchmarks:
 
 run_benchmarks_neon:
 	build/benchmarks/acar/benchmark_neon
+	build/benchmarks/acar/benchmark_4x64_neon
 	build/benchmarks/bh23/benchmark_neon
+	build/benchmarks/bh23/benchmark_4x64_neon
 	build/benchmarks/bm17/benchmark_neon
 
 emulate_benchmarks_neon:
 	$(EMULATOR) build/benchmarks/acar/benchmark_neon
 	$(EMULATOR) build/benchmarks/acar/benchmark_4x64_neon
-	$(EMULATOR) build/benchmarks/bm17/benchmark_neon
 	$(EMULATOR) build/benchmarks/bh23/benchmark_neon
 	$(EMULATOR) build/benchmarks/bh23/benchmark_4x64_neon
+	$(EMULATOR) build/benchmarks/bm17/benchmark_neon
 
 ## Acar
 benchmarks_acar: N := benchmark
