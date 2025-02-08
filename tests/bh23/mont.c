@@ -1,6 +1,7 @@
 #include "../minunit.h"
 #include <stdio.h>
 
+#include "../../c/constants.h"
 #include "../../c/bigints/bigint_8x32/bigint.h"
 #include "../../c/bigints/bigint_8x32/hex.h"
 #include "../../c/bh23/mont.h"
@@ -8,8 +9,8 @@
 
 MU_TEST(test_mont_mul) {
     // For the BN254 scalar field.
-    uint64_t n0 = 4026531839;
-    char* p_hex = "30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001";
+    uint64_t n0 = BN254_SCALAR_N0_8x32;
+    char* p_hex = BN254_SCALAR_HEX;
 
     char** hex_strs = get_mont_test_data();
 

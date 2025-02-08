@@ -1,6 +1,7 @@
 #include "../minunit.h"
 #include <stdio.h>
 
+#include "../../c/constants.h"
 #include "../../c/bigints/bigint_8x32/bigint.h"
 #include "../../c/bigints/bigint_8x32/hex.h"
 #include "../../c/bm17/mont.h"
@@ -8,9 +9,9 @@
 
 MU_TEST(test_mont_mul_bn254_scalar) {
     // mu = p^-1 mod 2^LIMB_BITS
-    uint64_t mu = 268435457;
+    char* p_hex = BN254_SCALAR_HEX;
+    uint64_t mu = BN254_SCALAR_BM17_MU_4x64;
 
-    char* p_hex = "30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001";
     // Sample values that work:
     char* ar_hex = "14a9c2762b8ab0f20cb1096618a19a05d483d5405f405ef524524a41d90fff2f";
     char* br_hex = "0aefa8fa0094edcbcd47dd061763108702bbdc704174a53b54507c8c28c69c77";
