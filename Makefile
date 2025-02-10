@@ -280,6 +280,14 @@ benchmarks_domb_4x64:
 run_benchmarks_domb_4x64:
 	build/benchmarks/domb/benchmark_4x64
 
+benchmarks_domb_4x64_neon: N := benchmark_4x64
+benchmarks_domb_4x64_neon:
+	mkdir -p build/benchmarks/domb
+	$(ARM_CC) $(CFLAGS_NEON) benchmarks/domb/$(N).c -o build/benchmarks/domb/$(N)_neon
+
+run_benchmarks_domb_4x64_neon:
+	build/benchmarks/domb/benchmark_4x64_neon
+
 ## BM17
 benchmarks_bm17: N := benchmark
 benchmarks_bm17:
