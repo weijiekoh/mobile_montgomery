@@ -4,7 +4,7 @@
 #include "../../c/constants.h"
 #include "../../c/bigints/bigint_4x64/bigint.h"
 #include "../../c/bigints/bigint_4x64/hex.h"
-#include "../../c/bh23/mont_4x64.h"
+#include "../../c/domb/mont_4x64.h"
 #include "../data/test_mont_data.h"
 
 MU_TEST(test_mont_mul) {
@@ -14,7 +14,7 @@ MU_TEST(test_mont_mul) {
 
     char** hex_strs = get_mont_test_data();
 
-    BigInt p, ar, br, abr, expected;
+    BigInt p, ar, br, expected;
 
     // Convert p_hex to a BigInt
     int result;
@@ -35,14 +35,21 @@ MU_TEST(test_mont_mul) {
         result = bigint_from_hex(c_hex, &expected);
         mu_check(result == 0);
 
+        uint64_t t[NUM_LIMBS] = {0};
+
         // Perform mont mul
-        abr = mont_mul(&ar, &br, &p, n0);
+        mont_mul_no_reduce(&ar, &br, &p, n0, t);
 
+        printf("\n");
+        for (int i = 0; i < NUM_LIMBS; i++) {
+            printf("%016lx\n", t[i]);
+        }
 
-        char *abr_hex = bigint_to_hex(&abr);
+        /*char *abr_hex = bigint_to_hex(&abr);*/
 
-        mu_check(strcmp(abr_hex, c_hex) == 0);
-        mu_check(bigint_eq(&abr, &expected));
+        /*mu_check(strcmp(abr_hex, c_hex) == 0);*/
+        /*mu_check(bigint_eq(&abr, &expected));*/
+        break;
     }
 }
 

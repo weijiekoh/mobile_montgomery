@@ -17,14 +17,14 @@ void mont_mul_no_reduce(
 
         for (int j = 0; j < NUM_LIMBS; j ++) {
             r = abcd(t[j], ar->v[i], br->v[j], c);
-            c = r.hi;
-            t[j] = r.lo;
+            c = hi(r);
+            t[j] = lo(r);
         }
 
         // (c, s) = t[NUM_LIMBS] + c
         r = add(t[NUM_LIMBS], c);
-        c = r.hi;
-        s = r.lo;
+        c = hi(r);
+        s = lo(r);
         t[NUM_LIMBS] = s;
         t[NUM_LIMBS + 1] = c;
 
@@ -32,19 +32,19 @@ void mont_mul_no_reduce(
         m = t[0] * n0;
 
         r = abc(m, p->v[0], t[0]);
-        c = r.hi;
-        s = r.lo;
+        c = hi(r);
+        s = lo(r);
 
         for (int j = 1; j < NUM_LIMBS; j ++) {
             r = abcd(t[j], m, p->v[j], c);
-            c = r.hi;
-            s = r.lo;
+            c = hi(r);
+            s = lo(r);
             t[j - 1] = s;
         }
         // (c, s) = t[NUM_LIMBS] + c
         r = add(t[NUM_LIMBS], c);
-        c = r.hi;
-        s = r.lo;
+        c = hi(r);
+        s = lo(r);
 
         t[NUM_LIMBS - 1] = s;
         t[NUM_LIMBS] = t[NUM_LIMBS + 1] + c;
@@ -70,8 +70,6 @@ BigInt mont_mul(
 
     mont_mul_no_reduce(ar, br, p, n0, t);
 
-    uint128_t r;
-
     bool t_gt_p = false;
     for (int idx = 0; idx < NUM_LIMBS + 1; idx ++) {
         int i = NUM_LIMBS - idx;
@@ -88,6 +86,7 @@ BigInt mont_mul(
         }
     }
 
+    // if t <= p, return t
     if (!t_gt_p) {
         BigInt res = bigint_new();
         for (int i = 0; i < NUM_LIMBS; i ++) {
@@ -96,6 +95,7 @@ BigInt mont_mul(
         return res;
     }
 
+    // if t > p, return t - p
     uint64_t t_wide[NUM_LIMBS + 1] = {0};
     for (int i = 0; i < NUM_LIMBS + 1; i ++) {
         t_wide[i] = t[i];
@@ -103,16 +103,10 @@ BigInt mont_mul(
 
     uint64_t result[NUM_LIMBS + 1] = {0};
     uint64_t borrow = 0;
-
-    for (int i = 0; i < NUM_LIMBS + 1; i ++) {
-        uint64_t lhs_limb = t_wide[i];
-        uint64_t rhs_limb = 0;
-        if (i < NUM_LIMBS) {
-            rhs_limb = p->v[i];
-        }
-        r = sub_3(lhs_limb, rhs_limb, borrow);
-        result[i] = r.lo;
-        borrow = r.hi & 1;
+    
+    for (int i = 0; i < NUM_LIMBS; i++) {
+        result[i] = t_wide[i] - p->v[i] - borrow;
+        borrow = (t_wide[i] < (p->v[i] + borrow)) ? 1 : 0;
     }
 
     BigInt res;

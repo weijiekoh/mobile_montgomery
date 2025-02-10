@@ -14,7 +14,7 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_4x64 tests_bh23_mont_neon tests_bm17_mont tests_bm17_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_4x64 tests_bh23_mont_neon tests_domb_mont_4x64 tests_domb_mont_4x64_neon tests_bm17_mont tests_bm17_mont_neon
 
 run_tests:
 	build/tests/simd_sse4.1
@@ -25,6 +25,7 @@ run_tests:
 	build/tests/bm17/mont
 	build/tests/bh23/mont
 	build/tests/bh23/mont_4x64
+	build/tests/domb/mont_4x64
 
 
 ## tests/simd
@@ -144,6 +145,24 @@ tests_bh23_mont_neon:
 run_tests_bh23_mont_neon:
 	build/tests/bh23/mont_neon
 
+# tests/domb/mont_4x64
+tests_domb_mont_4x64: N := mont_4x64
+tests_domb_mont_4x64:
+	mkdir -p build/tests/domb
+	$(CC) $(CFLAGS) tests/domb/$(N).c -o build/tests/domb/$(N)
+
+run_tests_domb_mont_4x64:
+	build/tests/domb/mont_4x64
+
+# tests/domb/mont_4x64_neon
+tests_domb_mont_4x64_neon: N := mont_4x64
+tests_domb_mont_4x64_neon:
+	mkdir -p build/tests/domb
+	$(ARM_CC) $(CFLAGS_NEON) tests/domb/$(N).c -o build/tests/domb/$(N)_neon
+
+emulate_tests_domb_mont_4x64_neon:
+	$(EMULATOR) build/tests/domb/mont_4x64_neon
+
 ## tests/bm17/mont
 tests_bm17_mont: N := mont
 tests_bm17_mont:
@@ -160,7 +179,7 @@ tests_bm17_mont_neon:
 	$(ARM_CC) $(CFLAGS_NEON) tests/bm17/$(N).c -o build/tests/bm17/$(N)_neon
 
 # Benchmarks
-benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bh23_4x64 benchmarks_bh23_4x64_neon benchmarks_bm17 benchmarks_bm17_neon
+benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bh23_4x64 benchmarks_bh23_4x64_neon benchmarks_domb_4x64 benchmarks_domb_4x64_neon benchmarks_bm17 benchmarks_bm17_neon
 
 run_benchmarks:
 	build/benchmarks/acar/benchmark
@@ -168,12 +187,14 @@ run_benchmarks:
 	build/benchmarks/bm17/benchmark
 	build/benchmarks/bh23/benchmark
 	build/benchmarks/bh23/benchmark_4x64
+	build/benchmarks/domb/benchmark_4x64
 
 run_benchmarks_neon:
 	build/benchmarks/acar/benchmark_neon
 	build/benchmarks/acar/benchmark_4x64_neon
 	build/benchmarks/bh23/benchmark_neon
 	build/benchmarks/bh23/benchmark_4x64_neon
+	build/benchmarks/domb/benchmark_4x64_neon
 	build/benchmarks/bm17/benchmark_neon
 
 emulate_benchmarks_neon:
@@ -181,6 +202,7 @@ emulate_benchmarks_neon:
 	$(EMULATOR) build/benchmarks/acar/benchmark_4x64_neon
 	$(EMULATOR) build/benchmarks/bh23/benchmark_neon
 	$(EMULATOR) build/benchmarks/bh23/benchmark_4x64_neon
+	$(EMULATOR) build/benchmarks/domb/benchmark_4x64_neon
 	$(EMULATOR) build/benchmarks/bm17/benchmark_neon
 
 ## Acar
@@ -248,6 +270,15 @@ benchmarks_bh23_4x64_neon:
 
 run_benchmarks_bh23_4x64_neon:
 	build/benchmarks/bh23/benchmark_4x64_neon
+
+## Domb
+benchmarks_domb_4x64: N := benchmark_4x64
+benchmarks_domb_4x64:
+	mkdir -p build/benchmarks/domb
+	$(CC) $(CFLAGS) benchmarks/domb/$(N).c -o build/benchmarks/domb/$(N)
+
+run_benchmarks_domb_4x64:
+	build/benchmarks/domb/benchmark_4x64
 
 ## BM17
 benchmarks_bm17: N := benchmark

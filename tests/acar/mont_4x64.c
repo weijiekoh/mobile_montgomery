@@ -22,11 +22,6 @@ MU_TEST(test_mont_mul) {
     mu_check(result == 0);
 
     size_t NUM_TESTS = 1024;
-        
-    // Sample values that work:
-    /*char* ar_hex = "0b626d61fa9249f1cdb1ed842fb0ce3683f172e5127d698fdcb3c98cba5a3dcb";*/
-    /*char* br_hex = "060746d8f3aa110102f1a1ab3d42df987110b2c030400f4c16da68ed2578bf10";*/
-    /*char* c_hex = "11632819f9df31ebfcb1f55ee017a35b6c55b71ed489094efef76714eb7e1236";*/
 
     for (int i = 0; i < NUM_TESTS; i++) {
         char* ar_hex = hex_strs[i * 3];
