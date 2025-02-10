@@ -24,11 +24,11 @@ sudo apt install gcc make gcc-aarch64-linux-gnu qemu-aarch64
   of CIOS in
   [BH23](https://tches.iacr.org/index.php/TCHES/article/view/10972/10279).
 - [x] The NEON-optimised method in [BM17](https://eprint.iacr.org/2017/1057.pdf) by Joppe Bos.
+- [x] Yuval Domb's CIOS [implementation](https://github.com/ingonyama-zk/ingo_skyscraper/tree/main/src).
 - [ ] Montgomery squaring variants of all of the above algorithms.
 
 The following algorithms are not yet implemented:
 
-- [ ] Yuval Domb's CIOS [implementation](https://github.com/ingonyama-zk/ingo_skyscraper/tree/main/src).
 - [ ] Further optimisations to BM17 in [SLGCK14](https://eprint.iacr.org/2014/760.pdf).
 - [ ] Mitscha-Baude's [reduced-radix FIOS method](https://github.com/mitschabaude/montgomery/blob/main/doc/zprize22.md#13-x-30-bit-multiplication).
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
@@ -40,7 +40,7 @@ The following algorithms are not yet implemented:
 | BH23                | Done         | Done         | N/A  | TODO     | The gnark-optimised version of CIOS.                  |
 | BM17                | Done         | TODO         | Yes  | TODO     | Uses NEON vector instructions.                        |
 | SLGCK14             | TODO         | TODO         | Y    | TODO     | Optimisations to BM17.                                |
-| Yuval Domb CIOS     | TODO         | TODO         | TODO | TODO     |                                                       |
+| Yuval Domb CIOS     | TODO         | Done         | TODO | TODO     |                                                       |
 | EZW18               | TODO         | TODO         | ?    | TODO     | Emmart's method. Requires floating-point `madd`.      |
 
 | Algorithm           | 29-bit limbs | 30-bit limbs | NEON | Squaring | Notes                                                 |
@@ -67,10 +67,11 @@ final reduction is omittted.
 
 | Algorithm | Limb size | Time taken (ms) |
 |-----------|-----------|-----------------|
-| Acar      | 32 bits   | 224             |
+| Acar      | 32 bits   | 220             |
 | Acar      | 64 bits   | 104             |
 | BH23      | 32 bits   | 194             |
-| BH23      | 64 bits   | 104             |
+| BH23      | 64 bits   | 105             |
+| Domb      | 64 bits   | 104             |
 | BM17      | 32 bits   | 123             |
 
 ## Potential research directions
@@ -97,16 +98,9 @@ make run_benchmarks_neon
 ```
 
 Alternatively, cross-compile the benchmarks on your desktop machine, copy the
-following binaries to the device, and run them.
+following binaries to the device, and run the above command.
 
-```
-build/benchmarks/acar/benchmark_neon
-build/benchmarks/bm17/benchmark_neon
-build/benchmarks/bh23/benchmark_neon
-# ... and so on
-```
-
-They have been tested with a Raspberry Pi 5, specifically the CanaKit 8GB version.
+This codebase has been tested with a Raspberry Pi 5, specifically the CanaKit 8GB version.
 
 `lscpu`:
 

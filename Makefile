@@ -14,12 +14,13 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_4x64 tests_bh23_mont_neon tests_domb_mont_4x64 tests_domb_mont_4x64_neon tests_bm17_mont tests_bm17_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_neon tests_bh23_mont_4x64 tests_bh23_mont_4x64_neon tests_domb_mont_4x64 tests_domb_mont_4x64_neon tests_bm17_mont tests_bm17_mont_neon
 
 run_tests:
 	build/tests/simd_sse4.1
 	build/tests/simd_neon
 	build/tests/bigints/bigint_8x32/bigint
+	build/tests/bigints/bigint_4x64/bigint
 	build/tests/acar/mont
 	build/tests/acar/mont_4x64
 	build/tests/bm17/mont
@@ -27,6 +28,16 @@ run_tests:
 	build/tests/bh23/mont_4x64
 	build/tests/domb/mont_4x64
 
+run_tests_neon:
+	build/tests/simd_neon
+	build/tests/bigints/bigint_8x32/bigint_neon
+	build/tests/bigints/bigint_4x64/bigint_neon
+	build/tests/acar/mont_neon
+	build/tests/acar/mont_4x64_neon
+	build/tests/bm17/mont_neon
+	build/tests/bh23/mont_neon
+	build/tests/bh23/mont_4x64_neon
+	build/tests/domb/mont_4x64_neon
 
 ## tests/simd
 tests_simd: tests_simd_sse4.1 tests_simd_neon
@@ -53,7 +64,7 @@ emulate_tests_simd_neon:
 	$(EMULATOR) build/tests/simd_neon
 
 ## tests/bigints
-tests_bigints: tests_bigints_bigint_8x32 tests_bigints_bigint_4x64 tests_bigints_bigint_5x51
+tests_bigints: tests_bigints_bigint_8x32 tests_bigints_bigint_8x32_neon tests_bigints_bigint_4x64 tests_bigints_bigint_4x64_neon tests_bigints_bigint_5x51 tests_bigints_bigint_5x51_neon
 
 ### tests/bigints/bigint_8x32
 tests_bigints_bigint_8x32: N := bigint
@@ -64,6 +75,14 @@ tests_bigints_bigint_8x32:
 run_tests_bigints_bigint_8x32:
 	build/tests/bigints/bigint_8x32/bigint
 
+tests_bigints_bigint_8x32_neon: N := bigint
+tests_bigints_bigint_8x32_neon:
+	mkdir -p build/tests/bigints/bigint_8x32
+	$(ARM_CC) $(CFLAGS_NEON) tests/bigints/bigint_8x32/$(N).c -o build/tests/bigints/bigint_8x32/$(N)_neon
+
+run_tests_bigints_bigint_8x32_neon:
+	build/tests/bigints/bigint_8x32/bigint_neon
+
 ### tests/bigints/bigint_4x64
 tests_bigints_bigint_4x64: N := bigint
 tests_bigints_bigint_4x64:
@@ -72,6 +91,14 @@ tests_bigints_bigint_4x64:
 
 run_tests_bigints_bigint_4x64:
 	build/tests/bigints/bigint_4x64/bigint
+
+tests_bigints_bigint_4x64_neon: N := bigint
+tests_bigints_bigint_4x64_neon:
+	mkdir -p build/tests/bigints/bigint_4x64
+	$(ARM_CC) $(CFLAGS_NEON) tests/bigints/bigint_4x64/$(N).c -o build/tests/bigints/bigint_4x64/$(N)_neon
+
+run_tests_bigints_bigint_4x64_neon:
+	build/tests/bigints/bigint_4x64/bigint_neon
 	
 ### tests/bigints/bigint_5x51
 tests_bigints_bigint_5x51: N := bigint
@@ -81,6 +108,14 @@ tests_bigints_bigint_5x51:
 
 run_tests_bigints_bigint_5x51:
 	build/tests/bigints/bigint_5x51/bigint
+
+tests_bigints_bigint_5x51_neon: N := bigint
+tests_bigints_bigint_5x51_neon:
+	mkdir -p build/tests/bigints/bigint_5x51
+	$(ARM_CC) $(CFLAGS_NEON) tests/bigints/bigint_5x51/$(N).c -o build/tests/bigints/bigint_5x51/$(N)_neon
+
+run_tests_bigints_bigint_5x51_neon:
+	build/tests/bigints/bigint_5x51/bigint_neon
 
 ## tests/acar/mont
 tests_acar_mont: N := mont
@@ -99,6 +134,9 @@ tests_acar_mont_4x64:
 
 run_tests_acar_mont_4x64:
 	build/tests/acar/mont_4x64
+
+emulate_tests_acar_mont_4x64:
+	$(EMULATOR) build/tests/acar/mont_4x64
 
 ## tests/acar/mont_4x64_neon
 tests_acar_mont_4x64_neon: N := mont_4x64
@@ -136,11 +174,25 @@ tests_bh23_mont_4x64:
 run_tests_bh23_mont_4x64:
 	build/tests/bh23/mont_4x64
 
+tests_bh23_mont_4x64_neon: N := mont_4x64
+tests_bh23_mont_4x64_neon:
+	mkdir -p build/tests/bh23
+	$(ARM_CC) $(CFLAGS_NEON) tests/bh23/$(N).c -o build/tests/bh23/$(N)_neon
+
+emulate_tests_bh23_mont_4x64_neon:
+	$(EMULATOR) build/tests/bh23/mont_4x64_neon
+
+run_tests_bh23_mont_4x64_neon:
+	build/tests/bh23/mont_4x64_neon
+
 ## tests/bh23/mont_neon
 tests_bh23_mont_neon: N := mont
 tests_bh23_mont_neon:
 	mkdir -p build/tests/bh23
 	$(ARM_CC) $(CFLAGS_NEON) tests/bh23/$(N).c -o build/tests/bh23/$(N)_neon
+
+emulate_tests_bh23_mont_neon:
+	$(EMULATOR) build/tests/bh23/mont_neon
 
 run_tests_bh23_mont_neon:
 	build/tests/bh23/mont_neon
@@ -160,6 +212,9 @@ tests_domb_mont_4x64_neon:
 	mkdir -p build/tests/domb
 	$(ARM_CC) $(CFLAGS_NEON) tests/domb/$(N).c -o build/tests/domb/$(N)_neon
 
+run_tests_domb_mont_4x64_neon:
+	build/tests/domb/mont_4x64_neon
+
 emulate_tests_domb_mont_4x64_neon:
 	$(EMULATOR) build/tests/domb/mont_4x64_neon
 
@@ -177,6 +232,12 @@ tests_bm17_mont_neon: N := mont
 tests_bm17_mont_neon:
 	mkdir -p build/tests/bm17
 	$(ARM_CC) $(CFLAGS_NEON) tests/bm17/$(N).c -o build/tests/bm17/$(N)_neon
+
+emulate_tests_bm17_mont_neon:
+	$(EMULATOR) build/tests/bm17/mont_neon
+
+run_tests_bm17_mont_neon:
+	build/tests/bm17/mont_neon
 
 # Benchmarks
 benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bh23_4x64 benchmarks_bh23_4x64_neon benchmarks_domb_4x64 benchmarks_domb_4x64_neon benchmarks_bm17 benchmarks_bm17_neon
