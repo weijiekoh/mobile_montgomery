@@ -12,33 +12,39 @@ MU_TEST(test_mont_mul_bn254_scalar) {
     char* p_hex = BN254_SCALAR_HEX;
     uint64_t mu = BN254_SCALAR_BM17_MU_4x64;
 
-    // Sample values that work:
-    char* ar_hex = "14a9c2762b8ab0f20cb1096618a19a05d483d5405f405ef524524a41d90fff2f";
-    char* br_hex = "0aefa8fa0094edcbcd47dd061763108702bbdc704174a53b54507c8c28c69c77";
-    char* expected_hex = "03191bdfb1ecefea0760e45312c3d552e95683d9459749c3b007050dc777e8ac";
+    /*// Sample values that work:*/
+    /*char* ar_hex = "14a9c2762b8ab0f20cb1096618a19a05d483d5405f405ef524524a41d90fff2f";*/
+    /*char* br_hex = "0aefa8fa0094edcbcd47dd061763108702bbdc704174a53b54507c8c28c69c77";*/
+    /*char* expected_hex = "03191bdfb1ecefea0760e45312c3d552e95683d9459749c3b007050dc777e8ac";*/
+    char** hex_strs = get_mont_test_data();
 
     BigInt p, ar, br, abr, expected;
 
-    // Convert p_hex to a BigInt
+    size_t NUM_TESTS = 1024;
+
     int result;
-    result = bigint_from_hex(p_hex, &p);
-    mu_check(result == 0);
-    result = bigint_from_hex(ar_hex, &ar);
-    mu_check(result == 0);
-    result = bigint_from_hex(br_hex, &br);
-    mu_check(result == 0);
-    result = bigint_from_hex(expected_hex, &expected);
-    mu_check(result == 0);
 
-    abr = mont_mul(&ar, &br, &p, mu);
+    for (int i = 0; i < NUM_TESTS; i++) {
+        char* ar_hex = hex_strs[i * 3];
+        char* br_hex = hex_strs[i * 3 + 1];
+        char* c_hex = hex_strs[i * 3 + 2];
 
-    char *abr_hex = bigint_to_hex(&abr);
+        result = bigint_from_hex(p_hex, &p);
+        mu_check(result == 0);
+        result = bigint_from_hex(ar_hex, &ar);
+        mu_check(result == 0);
+        result = bigint_from_hex(br_hex, &br);
+        mu_check(result == 0);
+        result = bigint_from_hex(c_hex, &expected);
+        mu_check(result == 0);
 
-    /*printf("%s\n", ar_hex);*/
-    /*printf("%s\n", br_hex);*/
-    /*printf("%s\n", abr_hex);*/
-    /*printf("expected_hex: %s\n", expected_hex);*/
-    mu_check(strcmp(abr_hex, expected_hex) == 0);
+        abr = mont_mul(&ar, &br, &p, mu);
+
+        char *abr_hex = bigint_to_hex(&abr);
+
+        mu_check(bigint_eq(&abr, &expected));
+        mu_check(strcmp(abr_hex, c_hex) == 0);
+    }
 }
 
 MU_TEST(test_mont_mul_bls12_377_scalar) {
