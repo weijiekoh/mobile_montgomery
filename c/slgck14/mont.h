@@ -27,8 +27,6 @@ void mont_mul_no_reduce(
 
     for (int i = 0; i < NUM_LIMBS; i++) {
         // Part 2: multiplication and carry propagation
-        // p11: use VMULL to perform the multiplications. It seems that the
-        // reason to not use VMLAL is that interdependencies may arise.
         rac[4] = rac[4] + (uint64_t)ar->v[i] * rb[4];
         rac[0] = rac[0] + (uint64_t)ar->v[i] * rb[0];
 
@@ -41,29 +39,19 @@ void mont_mul_no_reduce(
         rac[7] = rac[7] + (uint64_t)ar->v[i] * rb[7];
         rac[3] = rac[3] + (uint64_t)ar->v[i] * rb[3];
 
-        rlo = {0};
-        rhi = {0};
-
-        // TODO: transpose rac into rhi and rlo
-
-        rlo[4] = rlo[4] + rhi[3]; 
-
-        rlo[5] = rlo[5] + rhi[4]; 
-        rlo[1] = rlo[1] + rhi[0]; 
-
-        rlo[6] = rlo[6] + rhi[5]; 
-        rlo[2] = rlo[2] + rhi[1]; 
-
-        rlo[7] = rlo[7] + rhi[6]; 
-        rlo[3] = rlo[3] + rhi[2]; 
-
-        rlo[8] = rhi[7];
+        // Transpose rac into rhi and rlo
+        for (int j = 0; j < NUM_LIMBS; j++) {
+            if (j < NUM_LIMBS / 2) {
+                rlo[j] = rac[j]; // Lower half
+            } else {
+                rhi[j - (NUM_LIMBS / 2)] = rac[j]; // Upper half
+            }
+        }
 
         // Part 3
         rq[i] = rlo[0] * mu;
 
         // Part 4
-        // Uses VMLAL
         rac[4] = rlo[4] + rq[i] * p->v[4];
         rac[0] = rlo[0] + rq[i] * p->v[0];
 
@@ -76,24 +64,13 @@ void mont_mul_no_reduce(
         rac[7] = rlo[7] + rq[i] * p->v[7];
         rac[3] = rlo[3] + rq[i] * p->v[3];
 
-        rlo = {0};
-        rhi = {0};
-
-        // TODO: transpose rac into rhi and rlo
-
-        rhi[3] = rhi[3] + rlo[4];
-        rlo[4] = rhi[3];
-
-        rlo[5] = rlo[5] + rhi[4];
-        rlo[1] = rlo[1] + rhi[0];
-        rlo[6] = rlo[5] + rhi[4];
-        rlo[2] = rlo[2] + rhi[1];
-        rlo[7] = rlo[5] + rhi[4];
-        rlo[8] = rlo[8] + rhi[7];
-
-        for (int j = 0; j < NUM_LIMBS - 1] {
-            rac[j + NUM_LIMBS] = rlo[j + NUM_LIMBS + 1];
-            rac[j            ] = rlo[j + 1];
+        // Transpose rac into rhi and rlo again
+        for (int j = 0; j < NUM_LIMBS; j++) {
+            if (j < NUM_LIMBS / 2) {
+                rlo[j] = rac[j]; // Lower half
+            } else {
+                rhi[j - (NUM_LIMBS / 2)] = rac[j]; // Upper half
+            }
         }
     }
     // Final alignment
