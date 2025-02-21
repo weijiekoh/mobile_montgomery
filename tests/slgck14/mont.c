@@ -4,7 +4,7 @@
 #include "../../c/constants.h"
 #include "../../c/bigints/bigint_8x32/bigint.h"
 #include "../../c/bigints/bigint_8x32/hex.h"
-#include "../../c/bh23/mont.h"
+#include "../../c/slgck14/mont.h"
 #include "../data/test_mont_data.h"
 
 MU_TEST(test_mont_mul) {
@@ -22,7 +22,7 @@ MU_TEST(test_mont_mul) {
     mu_check(result == 0);
 
     size_t NUM_TESTS = 1024;
-        
+
     for (int i = 0; i < NUM_TESTS; i++) {
         char* ar_hex = hex_strs[i * 3];
         char* br_hex = hex_strs[i * 3 + 1];
@@ -38,12 +38,13 @@ MU_TEST(test_mont_mul) {
         // Perform mont mul
         abr = mont_mul(&ar, &br, &p, n0);
 
-        mu_check(bigint_eq(&abr, &expected));
-
         char *abr_hex = bigint_to_hex(&abr);
+
+        printf("\nabr_hex:      %s\n", abr_hex);
+        printf("expected_hex: %s\n", c_hex);
+
         mu_check(strcmp(abr_hex, c_hex) == 0);
-        /*printf("\nabr_hex:      %s\n", abr_hex);*/
-        /*printf("expected_hex: %s\n", c_hex);*/
+        mu_check(bigint_eq(&abr, &expected));
         /*break;*/
     }
 }

@@ -1,132 +1,246 @@
+#include <assert.h>
 #include "../simd/simd.h"
+#include "../transpose.h"
+
+/// Returns the higher 32 bits.
+static inline uint64_t hi(uint64_t v) {
+    return v >> BITS_PER_LIMB;
+}
+
+/// Returns the lower 32 bits.
+static inline uint64_t lo(uint64_t v) {
+    return v & LIMB_MASK;
+}
+
+/// Propagate carries in an array of limbs.
+/// 'x' has 'len' entries.
+static inline void carry_propagate(uint64_t *x, int len) {
+    uint64_t carry = 0;
+    for (int i = 0; i < len; i++) {
+        x[i] += carry;
+        carry = x[i] >> BITS_PER_LIMB;
+        x[i] &= LIMB_MASK;
+    }
+}
 
 void mont_mul_no_reduce(
     BigInt *ar,
     BigInt *br,
     BigInt *p,
-    uint32_t mu,
-    BigInt *d,
-    BigInt *e
-) { 
-    uint32_t rb[NUM_LIMBS] = {0};
-    uint32_t rq[NUM_LIMBS] = {0};
+    uint64_t n0,
+    uint64_t *t  // t must be an array of NUM_LIMBS+1 limbs
+) {
+    i64 vaiai = i64_zero();
+    i128 res02 = i128_zero();
+    i128 res13 = i128_zero();
+    i128 res46 = i128_zero();
+    i128 res57 = i128_zero();
 
-    uint64_t rac[NUM_LIMBS] = {0};
-    uint64_t rhi[NUM_LIMBS] = {0};
-    uint64_t rlo[NUM_LIMBS] = {0};
+    i128 vrac[NUM_LIMBS] = {0};
 
-    // Part 1: Transpose b (use VTRN)
-    rb[0] = br->v[0];
-    rb[1] = br->v[4];
-    rb[2] = br->v[2];
-    rb[3] = br->v[6];
-    rb[4] = br->v[1];
-    rb[5] = br->v[5];
-    rb[6] = br->v[3];
-    rb[7] = br->v[7];
+    i64 vb40 = i32x2_make(br->v[4], br->v[0]);
+    i64 vb62 = i32x2_make(br->v[6], br->v[2]);
+    i64 vb51 = i32x2_make(br->v[5], br->v[1]);
+    i64 vb73 = i32x2_make(br->v[7], br->v[3]);
+
+    i64 vp40 = i32x2_make(p->v[4], p->v[0]);
+    i64 vp62 = i32x2_make(p->v[6], p->v[2]);
+    i64 vp51 = i32x2_make(p->v[5], p->v[1]);
+    i64 vp73 = i32x2_make(p->v[7], p->v[3]);
+
+    i128 v0 = i128_zero();
+    i128 v1 = i128_zero();
+    i128 v2 = i128_zero();
+    i128 v3 = i128_zero();
+
+    i64 v00 = i64_zero();
+    i64 v01 = i64_zero();
+    i64 v10 = i64_zero();
+    i64 v11 = i64_zero();
+    i64 v20 = i64_zero();
+    i64 v21 = i64_zero();
+    uint64_t rhi7 = 0;
+
+    uint32x4_t zero = vdupq_n_u32(0);
+    uint64_t t8 = 0;
+
+    i128 v20_add_10, v21_add_11, v00_add_v3_shr_0, v01_add_v3_shr_1, v3_shr;
+    i64 v3_shr_0, v3_shr_1;
 
     for (int i = 0; i < NUM_LIMBS; i++) {
-        // Part 2: multiplication and carry propagation
-        // p11: use VMULL to perform the multiplications. It seems that the
-        // reason to not use VMLAL is that interdependencies may arise.
-        rac[4] = rac[4] + (uint64_t)ar->v[i] * rb[4];
-        rac[0] = rac[0] + (uint64_t)ar->v[i] * rb[0];
+        vaiai = i32x2_make(ar->v[i], ar->v[i]);
 
-        rac[5] = rac[5] + (uint64_t)ar->v[i] * rb[5];
-        rac[1] = rac[1] + (uint64_t)ar->v[i] * rb[1];
+        // 4x vmull
+        vrac[0] = i64x2_mul(vaiai, vb40);
+        vrac[1] = i64x2_mul(vaiai, vb62);
+        vrac[2] = i64x2_mul(vaiai, vb51);
+        vrac[3] = i64x2_mul(vaiai, vb73);
 
-        rac[6] = rac[6] + (uint64_t)ar->v[i] * rb[6];
-        rac[2] = rac[2] + (uint64_t)ar->v[i] * rb[2];
+        // 4x vtrn
+        // TODO: refactor
+        v0 = (i128) vtrn1q_u32((uint32x4_t) vrac[1], (uint32x4_t) vrac[0]);
+        v1 = (i128) vtrn2q_u32((uint32x4_t) vrac[1], (uint32x4_t) vrac[0]);
+        v2 = (i128) vtrn1q_u32((uint32x4_t) vrac[3], (uint32x4_t) vrac[2]);
+        v3 = (i128) vtrn2q_u32((uint32x4_t) vrac[3], (uint32x4_t) vrac[2]);
 
-        rac[7] = rac[7] + (uint64_t)ar->v[i] * rb[7];
-        rac[3] = rac[3] + (uint64_t)ar->v[i] * rb[3];
+        v00 = (i64) i64x2_extract_l(v0); // rlo0, rlo2
+        v01 = (i64) i64x2_extract_h(v0); // rlo4, rlo6
+        v10 = (i64) i64x2_extract_l(v1); // rhi0, rhi2
+        v11 = (i64) i64x2_extract_h(v1); // rhi4, rhi6
+        v20 = (i64) i64x2_extract_l(v2); // rlo1, rlo3
+        v21 = (i64) i64x2_extract_h(v2); // rlo5, rlo7
+        rhi7 = vgetq_lane_u32((uint32x4_t) v3, 0);
 
-        rlo = {0};
-        rhi = {0};
+        v20_add_10 = (i128) i64x2_widening_add(v20, v10);
+        v21_add_11 = (i128) i64x2_widening_add(v21, v11);
+        v3_shr = (i128) vextq_u32((uint32x4_t) v3, zero, 1);
 
-        // TODO: transpose rac into rhi and rlo
+        v3_shr_0 = (i64) i64x2_extract_l(v3_shr); // 0000, rhi1
+        v3_shr_1 = (i64) i64x2_extract_h(v3_shr); // rhi3, rhi5
+        v00_add_v3_shr_0 = (i128) i64x2_widening_add(v00, v3_shr_0); // t0, t2
+        v01_add_v3_shr_1 = (i128) i64x2_widening_add(v01, v3_shr_1);
+        t8 += rhi7;
 
-        rlo[4] = rlo[4] + rhi[3]; 
+        res02 = i64x2_add(res02, v00_add_v3_shr_0);
+        res13 = i64x2_add(res13, v20_add_10);
+        res46 = i64x2_add(res46, v01_add_v3_shr_1);
+        res57 = i64x2_add(res57, v21_add_11);
 
-        rlo[5] = rlo[5] + rhi[4]; 
-        rlo[1] = rlo[1] + rhi[0]; 
+        // Compute m
+        uint64_t c0 = vgetq_lane_u32((uint32x4_t) res02, 2);
+        uint32_t c0m = (c0 * n0) & LIMB_MASK;
 
-        rlo[6] = rlo[6] + rhi[5]; 
-        rlo[2] = rlo[2] + rhi[1]; 
+        i64 mm = vdup_n_u32(c0m);
 
-        rlo[7] = rlo[7] + rhi[6]; 
-        rlo[3] = rlo[3] + rhi[2]; 
+        // 4x VMUL
+        vrac[0] = i64x2_mul(vp40, mm);
+        vrac[1] = i64x2_mul(vp62, mm);
+        vrac[2] = i64x2_mul(vp51, mm);
+        vrac[3] = i64x2_mul(vp73, mm);
 
-        rlo[8] = rhi[7];
+        // 4x VTRN
+        // TODO: refactor
+        v0 = (i128) vtrn1q_u32((uint32x4_t) vrac[1], (uint32x4_t) vrac[0]);
+        v1 = (i128) vtrn2q_u32((uint32x4_t) vrac[1], (uint32x4_t) vrac[0]);
+        v2 = (i128) vtrn1q_u32((uint32x4_t) vrac[3], (uint32x4_t) vrac[2]);
+        v3 = (i128) vtrn2q_u32((uint32x4_t) vrac[3], (uint32x4_t) vrac[2]);
 
-        // Part 3
-        rq[i] = rlo[0] * mu;
+        v00 = (i64) i64x2_extract_l(v0); // rlo0, rlo2
+        v01 = (i64) i64x2_extract_h(v0); // rlo4, rlo6
+        v10 = (i64) i64x2_extract_l(v1); // rhi0, rhi2
+        v11 = (i64) i64x2_extract_h(v1); // rhi4, rhi6
+        v20 = (i64) i64x2_extract_l(v2); // rlo1, rlo3
+        v21 = (i64) i64x2_extract_h(v2); // rlo5, rlo7
+        rhi7 = vgetq_lane_u32((uint32x4_t) v3, 0);
 
-        // Part 4
-        // Uses VMLAL
-        rac[4] = rlo[4] + rq[i] * p->v[4];
-        rac[0] = rlo[0] + rq[i] * p->v[0];
+        v20_add_10 = (i128) i64x2_widening_add(v20, v10);
+        v21_add_11 = (i128) i64x2_widening_add(v21, v11);
+        v3_shr = (i128) vextq_u32((uint32x4_t) v3, zero, 1);
 
-        rac[5] = rlo[5] + rq[i] * p->v[5];
-        rac[1] = rlo[1] + rq[i] * p->v[1];
+        v3_shr_0 = (i64) i64x2_extract_l(v3_shr); // 0000, rhi1
+        v3_shr_1 = (i64) i64x2_extract_h(v3_shr); // rhi3, rhi5
+        v00_add_v3_shr_0 = (i128) i64x2_widening_add(v00, v3_shr_0); // t0, t2
+        v01_add_v3_shr_1 = (i128) i64x2_widening_add(v01, v3_shr_1);
+        t8 += rhi7;
 
-        rac[6] = rlo[6] + rq[i] * p->v[6];
-        rac[2] = rlo[2] + rq[i] * p->v[2];
+        res02 = i64x2_add(res02, v00_add_v3_shr_0);
+        res13 = i64x2_add(res13, v20_add_10);
+        res46 = i64x2_add(res46, v01_add_v3_shr_1);
+        res57 = i64x2_add(res57, v21_add_11);
 
-        rac[7] = rlo[7] + rq[i] * p->v[7];
-        rac[3] = rlo[3] + rq[i] * p->v[3];
+        uint64_t r[9];
+        r[0] = i64x2_extract_l(res02);
+        r[2] = i64x2_extract_h(res02);
+        r[1] = i64x2_extract_l(res13);
+        r[3] = i64x2_extract_h(res13);
+        r[4] = i64x2_extract_l(res46);
+        r[6] = i64x2_extract_h(res46);
+        r[5] = i64x2_extract_l(res57);
+        r[7] = i64x2_extract_h(res57);
+        r[8] = t8;
 
-        rlo = {0};
-        rhi = {0};
+        carry_propagate(r, 9);
 
-        // TODO: transpose rac into rhi and rlo
-
-        rhi[3] = rhi[3] + rlo[4];
-        rlo[4] = rhi[3];
-
-        rlo[5] = rlo[5] + rhi[4];
-        rlo[1] = rlo[1] + rhi[0];
-        rlo[6] = rlo[5] + rhi[4];
-        rlo[2] = rlo[2] + rhi[1];
-        rlo[7] = rlo[5] + rhi[4];
-        rlo[8] = rlo[8] + rhi[7];
-
-        for (int j = 0; j < NUM_LIMBS - 1] {
-            rac[j + NUM_LIMBS] = rlo[j + NUM_LIMBS + 1];
-            rac[j            ] = rlo[j + 1];
+        // Shift
+        for (int j = 0; j < NUM_LIMBS; j++) {
+            r[j] = r[j+1];
         }
-    }
-    // Final alignment
-    // p12: "The final results from C[8] to C[15] should be aligned to
-    // propagate carry bits from least signficant word (C[8]) to most (C[15]).
-    // Firstly, higher bits of C[8] are added to C[9] and this is iterated to
-    // most significant intermediate result (C[15])."
 
-    // Final subtraction
-    //
-    // return rac
+        r[NUM_LIMBS] = 0;
+
+        res02 = i64x2_make(r[2], r[0]);
+        res13 = i64x2_make(r[3], r[1]);
+        res46 = i64x2_make(r[6], r[4]);
+        res57 = i64x2_make(r[7], r[5]);
+        t8 = r[8];
+    }
+
+    t[0] = i64x2_extract_l(res02);
+    t[2] = i64x2_extract_h(res02);
+    t[1] = i64x2_extract_l(res13);
+    t[3] = i64x2_extract_h(res13);
+    t[4] = i64x2_extract_l(res46);
+    t[6] = i64x2_extract_h(res46);
+    t[5] = i64x2_extract_l(res57);
+    t[7] = i64x2_extract_h(res57);
+    t[8] = t8;
 }
 
-// Appendix B of "Montgomery Modular Multiplication on ARM-NEON Revisited" by
-// Seo, et. al. Retrived from https://eprint.iacr.org/2014/760.pdf
-// Uses SIMD opcodes.
 BigInt mont_mul(
     BigInt *ar,
     BigInt *br,
     BigInt *p,
-    uint64_t mu
-) { 
-    BigInt d = bigint_new();
-    BigInt e = bigint_new();
-    mont_mul_no_reduce(ar, br, p, mu, &d, &e);
+    uint64_t n0
+) {
+    uint64_t t[NUM_LIMBS + 1] = {0};
 
-    BigInt result = bigint_new();
-    if (bigint_gt(&e, &d)) {
-        BigInt e_minus_d = bigint_sub(&e, &d);
-        result = bigint_sub(p, &e_minus_d);
-    } else {
-        result = bigint_sub(&d, &e);
+    mont_mul_no_reduce(ar, br, p, n0, t);
+
+    bool t_gt_p = false;
+    for (int idx = 0; idx < NUM_LIMBS; idx ++) {
+        int i = NUM_LIMBS - idx;
+        uint64_t pi = 0;
+        if (i < NUM_LIMBS) {
+            pi = p->v[i];
+        };
+
+        if (t[i] < pi) {
+            break;
+        } else if (t[i] > pi) {
+            t_gt_p = true;
+            break;
+        }
     }
 
-    return result;
+    if (!t_gt_p) {
+        BigInt res;
+        res = bigint_new();
+        for (int i = 0; i < NUM_LIMBS; i ++) {
+            res.v[i] = t[i];
+        }
+        return res;
+    }
+
+    uint64_t result[NUM_LIMBS] = {0};
+    uint64_t borrow = 0;
+
+    for (int i = 0; i < NUM_LIMBS; i ++) {
+        uint64_t lhs_limb = t[i];
+        uint64_t rhs_limb = 0;
+        if (i < NUM_LIMBS) {
+            rhs_limb = p->v[i];
+        }
+        uint64_t diff = lhs_limb - rhs_limb - borrow;
+        result[i] = diff & LIMB_MASK;
+        borrow = (diff >> BITS_PER_LIMB) & 1;
+    }
+
+    BigInt res;
+    res = bigint_new();
+    for (int i = 0; i < NUM_LIMBS; i ++) {
+        res.v[i] = result[i];
+    }
+
+    return res;
 }
+

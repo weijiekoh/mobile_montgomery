@@ -12,10 +12,6 @@ MU_TEST(test_mont_mul_bn254_scalar) {
     char* p_hex = BN254_SCALAR_HEX;
     uint64_t mu = BN254_SCALAR_BM17_MU_4x64;
 
-    /*// Sample values that work:*/
-    /*char* ar_hex = "14a9c2762b8ab0f20cb1096618a19a05d483d5405f405ef524524a41d90fff2f";*/
-    /*char* br_hex = "0aefa8fa0094edcbcd47dd061763108702bbdc704174a53b54507c8c28c69c77";*/
-    /*char* expected_hex = "03191bdfb1ecefea0760e45312c3d552e95683d9459749c3b007050dc777e8ac";*/
     char** hex_strs = get_mont_test_data();
 
     BigInt p, ar, br, abr, expected;
