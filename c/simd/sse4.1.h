@@ -97,6 +97,22 @@ static inline i128 i64x2_mul(i64 a, i64 b) {
     return i64x2_make(prod_hi, prod_lo);
 }
 
+static inline i128 i64x2_widening_add(i64 a, i64 b) {
+    // Extract the two 32-bit lanes from each input
+    uint32_t a_lo = i32x2_extract_l(a);
+    uint32_t a_hi = i32x2_extract_h(a);
+    uint32_t b_lo = i32x2_extract_l(b);
+    uint32_t b_hi = i32x2_extract_h(b);
+
+    // Widen each 32-bit lane to 64 bits and add corresponding lanes
+    uint64_t sum_lo = (uint64_t)a_lo + (uint64_t)b_lo;
+    uint64_t sum_hi = (uint64_t)a_hi + (uint64_t)b_hi;
+
+    // Pack the 64-bit results into a 128-bit SIMD vector:
+    // The first parameter is for the high lane and the second for the low lane.
+    return i64x2_make(sum_hi, sum_lo);
+}
+
 /*
  * Returns the lower (e0) 64-bit value from an i128.
  */
