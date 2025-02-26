@@ -97,6 +97,7 @@ void mont_mul_no_reduce(
         rhi7 = (uint64_t) i32x4_extract_0((i32x4) v3);
 
         v20_add_10 = (i128) i64x2_widening_add(v20, v10);
+
         v21_add_11 = (i128) i64x2_widening_add(v21, v11);
         v3_shr = (i128) extq((i32x4) v3, zero, 1);
 

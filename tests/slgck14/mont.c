@@ -45,7 +45,7 @@ MU_TEST(test_mont_mul) {
 
         mu_check(strcmp(abr_hex, c_hex) == 0);
         mu_check(bigint_eq(&abr, &expected));
-        /*break;*/
+        break;
     }
 }
 
