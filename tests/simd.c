@@ -164,7 +164,8 @@ MU_TEST(test_i64x2_widening_add) {
     i64 a = i32x2_make(0x66666666, 0x88888888);
     i64 b = i32x2_make(0xffffffff, 0xffffffff);
     i128 r = i64x2_widening_add(a, b);
-    i128 expected = i64x2_make(0x166666665, 0x188888887);
+    i128 expected = i64x2_make(0x188888887, 0x166666665);
+
     mu_check(i128_eq(r, expected));
 }
 

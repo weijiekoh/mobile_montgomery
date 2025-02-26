@@ -5,7 +5,7 @@ CFLAGS_SSE = $(CFLAGS) -msse4.1
 CFLAGS_NEON = $(CFLAGS) -static
 EMULATOR = qemu-aarch64
 
-# Flags for the BM17 implementation
+# Flags for implementations which use SSE
 CFLAGS_BM17 = $(CFLAGS_SSE)
 CFLAGS_SLGCK14 = $(CFLAGS_SSE)
 
@@ -15,7 +15,7 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_neon tests_bh23_mont_4x64 tests_bh23_mont_4x64_neon tests_domb_mont_4x64 tests_domb_mont_4x64_neon tests_bm17_mont tests_bm17_mont_neon  tests_slgck14_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont tests_acar_mont_neon tests_acar_mont_4x64 tests_acar_mont_4x64_neon tests_bh23_mont tests_bh23_mont_neon tests_bh23_mont_4x64 tests_bh23_mont_4x64_neon tests_domb_mont_4x64 tests_domb_mont_4x64_neon tests_bm17_mont tests_bm17_mont_neon  tests_slgck14_mont tests_slgck14_mont_neon
 
 run_tests:
 	build/tests/simd_sse4.1
@@ -241,14 +241,14 @@ emulate_tests_bm17_mont_neon:
 run_tests_bm17_mont_neon:
 	build/tests/bm17/mont_neon
 
-### tests/slgck14/mont
-#tests_slgck14_mont: N := mont
-#tests_slgck14_mont:
-	#mkdir -p build/tests/slgck14
-	#$(CC) $(CFLAGS_SLGCK14) tests/slgck14/$(N).c -o build/tests/slgck14/$(N)
+## tests/slgck14/mont
+tests_slgck14_mont: N := mont
+tests_slgck14_mont:
+	mkdir -p build/tests/slgck14
+	$(CC) $(CFLAGS_SLGCK14) tests/slgck14/$(N).c -o build/tests/slgck14/$(N)
 
-#run_tests_slgck14_mont:
-	#build/tests/slgck14/mont
+run_tests_slgck14_mont:
+	build/tests/slgck14/mont
 
 ## tests/slgck14/mont_neon
 tests_slgck14_mont_neon: N := mont
@@ -260,7 +260,7 @@ emulate_tests_slgck14_mont_neon:
 	$(EMULATOR) build/tests/slgck14/mont_neon
 
 # Benchmarks
-benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bh23_4x64 benchmarks_bh23_4x64_neon benchmarks_domb_4x64 benchmarks_domb_4x64_neon benchmarks_bm17 benchmarks_bm17_neon benchmarks_slgck14_neon
+benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64 benchmarks_acar_4x64_neon benchmarks_bh23 benchmarks_bh23_neon benchmarks_bh23_4x64 benchmarks_bh23_4x64_neon benchmarks_domb_4x64 benchmarks_domb_4x64_neon benchmarks_bm17 benchmarks_bm17_neon benchmarks_slgck14 benchmarks_slgck14_neon
 
 run_benchmarks:
 	build/benchmarks/acar/benchmark
@@ -389,6 +389,14 @@ run_benchmarks_bm17_neon:
 	build/benchmarks/bm17/benchmark_neon
 
 # SLGCK14
+benchmarks_slgck14: N := benchmark
+benchmarks_slgck14:
+	mkdir -p build/benchmarks/slgck14
+	$(CC) $(CFLAGS_SLGCK14) benchmarks/slgck14/$(N).c -o build/benchmarks/slgck14/$(N)
+
+run_benchmarks_slgck14:
+	build/benchmarks/slgck14/benchmark
+
 benchmarks_slgck14_neon: N := benchmark
 benchmarks_slgck14_neon:
 	mkdir -p build/benchmarks/slgck14

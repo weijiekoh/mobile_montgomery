@@ -7,6 +7,8 @@ typedef uint32x2_t i64;
 // Define a 64x2 SIMD vector (128 bits total)
 typedef uint64x2_t i128;
 
+typedef uint32x4_t i32x4;
+
 // Define a 32x4x2 SIMD vector (128 bits total)
 typedef struct {
     i128 val[2];
@@ -179,10 +181,6 @@ static inline i128x2 transpose(i128 a, i128 b) {
 
 // Extract the lowest 32-bit element from an i128 vector
 // high -> 0 1 2 3 <- low
-static inline uint32_t i32x4_extract_0(i128 in) {
-    uint64_t lo = i64x2_extract_l(in);
-    return i32x2_extract_h((i64) lo);
-}
 
 static inline bool i128_eq(i128 a, i128 b) {
     uint64_t a0 = i64x2_extract_l(a);
@@ -190,4 +188,32 @@ static inline bool i128_eq(i128 a, i128 b) {
     uint64_t b0 = i64x2_extract_l(b);
     uint64_t b1 = i64x2_extract_h(b);
     return a0 == b0 && a1 == b1;
+}
+
+static inline i128 trn1(uint32x4_t a, uint32x4_t b) {
+    return (i128) vtrn1q_u32(a, b);
+}
+
+static inline i128 trn2(uint32x4_t a, uint32x4_t b) {
+    return (i128) vtrn2q_u32(a, b);
+}
+
+static inline i128 extq(i32x4 a, i32x4 b, int i) {
+    return (i128) vextq_u32(a, b, i);
+}
+
+static inline i32x4 i32x4_zero() {
+    return vdupq_n_u32(0);
+}
+
+static inline uint32_t i32x4_extract(i32x4 a, int i) { 
+    return vgetq_lane_u32(a, i);
+}
+
+static inline uint32_t i32x4_extract_0(i32x4 a) {
+    return vgetq_lane_u32(a, 0);
+}
+
+static inline uint32_t i32x4_extract_2(i32x4 a) {
+    return vgetq_lane_u32(a, 2);
 }

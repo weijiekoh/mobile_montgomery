@@ -13,6 +13,8 @@ typedef __m64 i64;
 // 64x2 128-bit SIMD vector
 typedef __m128i i128;
 
+typedef __m128i i32x4;
+
 // A 32x4x2 SIMD vector
 typedef struct {
     i128 val[2];
@@ -27,6 +29,10 @@ static inline i128 i128_zero() { return _mm_setzero_si128(); }
  */
 static inline i64 i32x2_make(uint32_t hi, uint32_t lo) {
     return _mm_set_pi32(hi, lo);
+}
+
+static inline i64 i32x2_splat(uint32_t x) {
+    return i32x2_make(x, x);
 }
 
 /*
@@ -110,7 +116,7 @@ static inline i128 i64x2_widening_add(i64 a, i64 b) {
 
     // Pack the 64-bit results into a 128-bit SIMD vector:
     // The first parameter is for the high lane and the second for the low lane.
-    return i64x2_make(sum_hi, sum_lo);
+    return i64x2_make(sum_lo, sum_hi);
 }
 
 /*
@@ -234,4 +240,42 @@ static inline i128x2 transpose(i128 a, i128 b) {
 
 static inline bool i128_eq(i128 a, i128 b) {
     return (__int128) a == (__int128) b;
+}
+
+static inline i128 trn1(i32x4 a, i32x4 b) {
+    __m128i t1 = _mm_unpacklo_epi32(a, b); // t1 = [a0, b0, a1, b1]
+    __m128i t2 = _mm_unpackhi_epi32(a, b); // t2 = [a2, b2, a3, b3]
+    // Combine the lower 64 bits from t1 and t2 to get [a0, b0, a2, b2]
+    return _mm_unpacklo_epi64(t1, t2);
+}
+
+static inline i128 trn2(i32x4 a, i32x4 b) {
+    __m128i t1 = _mm_unpacklo_epi32(a, b); // t1 = [a0, b0, a1, b1]
+    __m128i t2 = _mm_unpackhi_epi32(a, b); // t2 = [a2, b2, a3, b3]
+    // Combine the higher 64 bits from t1 and t2 to get [a1, b1, a3, b3]
+    return _mm_unpackhi_epi64(t1, t2);
+}
+
+// Concatenates a and b and extracts a vector starting at the (i*4)-th byte.
+// For example, if i==1, result = [a1, a2, a3, b0].
+static inline i128 extq(i32x4 a, i32x4 b, int i) {
+    uint32_t lane0 = _mm_extract_epi32(a, 1);  // a[1]
+    uint32_t lane1 = _mm_extract_epi32(b, 0);  // b[0]
+    uint32_t lane2 = _mm_extract_epi32(a, 3);  // a[3]
+    uint32_t lane3 = _mm_extract_epi32(a, 0);  // a[0]
+    return _mm_setr_epi32(lane0, lane1, lane2, lane3);
+}
+
+static inline i32x4 i32x4_zero() {
+    return _mm_setzero_si128();
+}
+
+static inline uint32_t i32x4_extract_0(i32x4 a) {
+    uint64_t hi = i64x2_extract_h(a);
+    return hi & 0xffffffff;
+}
+
+static inline uint32_t i32x4_extract_2(i32x4 a) {
+    uint64_t lo = i64x2_extract_l(a);
+    return lo & 0xffffffff;
 }
