@@ -23,7 +23,7 @@ bool bigint_eq(const BigInt *a, const BigInt *b) {
 
 bool bigint_gt(
     BigInt* a,
-    BigInt *b
+    BigInt* b
 ) {
     int i;
     for (int idx = 0; idx < NUM_LIMBS; idx ++) {

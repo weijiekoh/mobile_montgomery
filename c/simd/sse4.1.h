@@ -1,12 +1,22 @@
 #include <immintrin.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-// 32x2 64-bit SIMD registers
+// All SIMD vector types defined here store their values in little endian format.
+// e.g. a 64-bit i64 stores 0x77771111 has 0x7777 as the higher 32 bits, and
+// 0x1111 as the lower 32 bits.
+
+// 32x2 64-bit SIMD vector
 typedef __m64 i64;
 
-// 64x2 128-bit SIMD registers
+// 64x2 128-bit SIMD vector
 typedef __m128i i128;
+
+// A 32x4x2 SIMD vector
+typedef struct {
+    i128 val[2];
+} i128x2;
 
 // Returns zero values
 static inline i64 i64_zero() { return _mm_setzero_si64(); }
@@ -15,19 +25,19 @@ static inline i128 i128_zero() { return _mm_setzero_si128(); }
 /*
  * Returns the i64 value containing the concatenation of hi and lo.
  */
-static inline i64 i32x2_make(uint32_t e1, uint32_t e0) {
-    return _mm_set_pi32(e1, e0);
+static inline i64 i32x2_make(uint32_t hi, uint32_t lo) {
+    return _mm_set_pi32(hi, lo);
 }
 
 /*
- * Returns the lower (e0) 32-bit value from an i64.
+ * Returns the lower 32-bit value from an i64.
  */
 static inline uint32_t i32x2_extract_l(i64 in) {
     return (uint32_t)_mm_cvtsi64_si32(in);
 }
 
 /*
- * Returns the higher (e1) 32-bit value from an i64.
+ * Returns the higher 32-bit value from an i64.
  */
 static inline uint32_t i32x2_extract_h(i64 in) {
     __m64 tmp = _mm_srli_si64(in, 32);
@@ -73,8 +83,18 @@ void print_i128(i128 in) {
  * According to the definition of _mm_set_epi64x(__int64 e1, __int64 e0),
  * e1 is stored at dst[127:64], and e0 is stored at dst[63:0].
  */
-static inline i128 i64x2_make(uint64_t e1, uint64_t e0) {
-    return _mm_set_epi64x(e1, e0);
+static inline i128 i64x2_make(uint64_t hi, uint64_t lo) {
+    return _mm_set_epi64x(hi, lo);
+}
+
+static inline i128 i64x2_mul(i64 a, i64 b) {
+    uint64_t a_lo = i32x2_extract_l(a);
+    uint64_t a_hi = i32x2_extract_h(a);
+    uint64_t b_lo = i32x2_extract_l(b);
+    uint64_t b_hi = i32x2_extract_h(b);
+    uint64_t prod_lo = a_lo * b_lo;
+    uint64_t prod_hi = a_hi * b_hi;
+    return i64x2_make(prod_hi, prod_lo);
 }
 
 /*
@@ -163,4 +183,39 @@ void print_f128(i128 in) {
         "(%c %d %013lx, %c %d %013lx)",
         sign0_char, exp0, mantissa0, sign1_char, exp1, mantissa1
     );
+}
+
+static inline i128x2 transpose(i128 a, i128 b) {
+    uint64_t a0 = i64x2_extract_l(a);
+    uint64_t a1 = i64x2_extract_h(a);
+
+    uint32_t a00 = (uint32_t)a0;
+    uint32_t a01 = (uint32_t)(a0 >> 32);
+    uint32_t a10 = (uint32_t)a1;
+    uint32_t a11 = (uint32_t)(a1 >> 32);
+
+    uint64_t b0 = i64x2_extract_l(b);
+    uint64_t b1 = i64x2_extract_h(b);
+
+    uint32_t b00 = (uint32_t)b0;
+    uint32_t b01 = (uint32_t)(b0 >> 32);
+    uint32_t b10 = (uint32_t)b1;
+    uint32_t b11 = (uint32_t)(b1 >> 32);
+
+    uint64_t c0 = (uint64_t)i32x2_make(b10, a10);
+    uint64_t c1 = (uint64_t)i32x2_make(b00, a00);
+    uint64_t d0 = (uint64_t)i32x2_make(b11, a11);
+    uint64_t d1 = (uint64_t)i32x2_make(b01, a01);
+
+    i128 c = i64x2_make(c0, c1);
+    i128 d = i64x2_make(d0, d1);
+
+    i128x2 res;
+    res.val[0] = c;
+    res.val[1] = d;
+    return res;
+}
+
+static inline bool i128_eq(i128 a, i128 b) {
+    return (__int128) a == (__int128) b;
 }
