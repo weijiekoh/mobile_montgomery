@@ -37,6 +37,7 @@ void mont_mul_no_reduce(
     i128 res57 = i128_zero();
 
     i128 vrac[4] = {i128_zero()};
+    i128 v[4] = {i128_zero()};
 
     i64 vb40 = i32x2_make(br->v[4], br->v[0]);
     i64 vb62 = i32x2_make(br->v[6], br->v[2]);
@@ -47,11 +48,6 @@ void mont_mul_no_reduce(
     i64 vp62 = i32x2_make(p->v[6], p->v[2]);
     i64 vp51 = i32x2_make(p->v[5], p->v[1]);
     i64 vp73 = i32x2_make(p->v[7], p->v[3]);
-
-    i128 v0 = i128_zero();
-    i128 v1 = i128_zero();
-    i128 v2 = i128_zero();
-    i128 v3 = i128_zero();
 
     i64 v00 = i64_zero();
     i64 v01 = i64_zero();
@@ -83,23 +79,23 @@ void mont_mul_no_reduce(
 
         // 4x vtrn
         // TODO: refactor
-        v0 = (i128) trn1((i32x4) vrac[1], (i32x4) vrac[0]);
-        v1 = (i128) trn2((i32x4) vrac[1], (i32x4) vrac[0]);
-        v2 = (i128) trn1((i32x4) vrac[3], (i32x4) vrac[2]);
-        v3 = (i128) trn2((i32x4) vrac[3], (i32x4) vrac[2]);
+        v[0] = (i128) trn1((i32x4) vrac[1], (i32x4) vrac[0]);
+        v[1] = (i128) trn2((i32x4) vrac[1], (i32x4) vrac[0]);
+        v[2] = (i128) trn1((i32x4) vrac[3], (i32x4) vrac[2]);
+        v[3] = (i128) trn2((i32x4) vrac[3], (i32x4) vrac[2]);
 
-        v00 = (i64) i64x2_extract_l(v0); // rlo0, rlo2
-        v01 = (i64) i64x2_extract_h(v0); // rlo4, rlo6
-        v10 = (i64) i64x2_extract_l(v1); // rhi0, rhi2
-        v11 = (i64) i64x2_extract_h(v1); // rhi4, rhi6
-        v20 = (i64) i64x2_extract_l(v2); // rlo1, rlo3
-        v21 = (i64) i64x2_extract_h(v2); // rlo5, rlo7
-        rhi7 = (uint64_t) i32x4_extract_0((i32x4) v3);
+        v00 = (i64) i64x2_extract_l(v[0]); // rlo0, rlo2
+        v01 = (i64) i64x2_extract_h(v[0]); // rlo4, rlo6
+        v10 = (i64) i64x2_extract_l(v[1]); // rhi0, rhi2
+        v11 = (i64) i64x2_extract_h(v[1]); // rhi4, rhi6
+        v20 = (i64) i64x2_extract_l(v[2]); // rlo1, rlo3
+        v21 = (i64) i64x2_extract_h(v[2]); // rlo5, rlo7
+        rhi7 = (uint64_t) i32x4_extract_0((i32x4) v[3]);
 
         v20_add_10 = (i128) i64x2_widening_add(v20, v10);
 
         v21_add_11 = (i128) i64x2_widening_add(v21, v11);
-        v3_shr = (i128) extq((i32x4) v3, zero, 1);
+        v3_shr = (i128) extq((i32x4) v[3], zero, 1);
 
         v3_shr_0 = (i64) i64x2_extract_l(v3_shr); // 0000, rhi1
         v3_shr_1 = (i64) i64x2_extract_h(v3_shr); // rhi3, rhi5
@@ -127,22 +123,22 @@ void mont_mul_no_reduce(
 
         // 4x VTRN
         // TODO: refactor
-        v0 = (i128) trn1((i32x4) vrac[1], (i32x4) vrac[0]);
-        v1 = (i128) trn2((i32x4) vrac[1], (i32x4) vrac[0]);
-        v2 = (i128) trn1((i32x4) vrac[3], (i32x4) vrac[2]);
-        v3 = (i128) trn2((i32x4) vrac[3], (i32x4) vrac[2]);
+        v[0] = (i128) trn1((i32x4) vrac[1], (i32x4) vrac[0]);
+        v[1] = (i128) trn2((i32x4) vrac[1], (i32x4) vrac[0]);
+        v[2] = (i128) trn1((i32x4) vrac[3], (i32x4) vrac[2]);
+        v[3] = (i128) trn2((i32x4) vrac[3], (i32x4) vrac[2]);
 
-        v00 = (i64) i64x2_extract_l(v0); // rlo0, rlo2
-        v01 = (i64) i64x2_extract_h(v0); // rlo4, rlo6
-        v10 = (i64) i64x2_extract_l(v1); // rhi0, rhi2
-        v11 = (i64) i64x2_extract_h(v1); // rhi4, rhi6
-        v20 = (i64) i64x2_extract_l(v2); // rlo1, rlo3
-        v21 = (i64) i64x2_extract_h(v2); // rlo5, rlo7
-        rhi7 = i32x4_extract_0((i32x4) v3);
+        v00 = (i64) i64x2_extract_l(v[0]); // rlo0, rlo2
+        v01 = (i64) i64x2_extract_h(v[0]); // rlo4, rlo6
+        v10 = (i64) i64x2_extract_l(v[1]); // rhi0, rhi2
+        v11 = (i64) i64x2_extract_h(v[1]); // rhi4, rhi6
+        v20 = (i64) i64x2_extract_l(v[2]); // rlo1, rlo3
+        v21 = (i64) i64x2_extract_h(v[2]); // rlo5, rlo7
+        rhi7 = i32x4_extract_0((i32x4) v[3]);
 
         v20_add_10 = (i128) i64x2_widening_add(v20, v10);
         v21_add_11 = (i128) i64x2_widening_add(v21, v11);
-        v3_shr = (i128) extq((i32x4) v3, zero, 1);
+        v3_shr = (i128) extq((i32x4) v[3], zero, 1);
 
         v3_shr_0 = (i64) i64x2_extract_l(v3_shr); // 0000, rhi1
         v3_shr_1 = (i64) i64x2_extract_h(v3_shr); // rhi3, rhi5
