@@ -24,12 +24,12 @@ sudo apt install gcc make gcc-aarch64-linux-gnu qemu-aarch64
   of CIOS in
   [BH23](https://tches.iacr.org/index.php/TCHES/article/view/10972/10279).
 - [x] The NEON-optimised method in [BM17](https://eprint.iacr.org/2017/1057.pdf) by Joppe Bos.
+- [x] Further optimisations to BM17 in [SLGCK14](https://eprint.iacr.org/2014/760.pdf).
 - [x] Yuval Domb's CIOS [implementation](https://github.com/ingonyama-zk/ingo_skyscraper/tree/main/src).
 - [ ] Montgomery squaring variants of all of the above algorithms.
 
 The following algorithms are not yet implemented:
 
-- [ ] Further optimisations to BM17 in [SLGCK14](https://eprint.iacr.org/2014/760.pdf).
 - [ ] Mitscha-Baude's [reduced-radix FIOS method](https://github.com/mitschabaude/montgomery/blob/main/doc/zprize22.md#13-x-30-bit-multiplication).
 - [ ] Niall Emmart's [floating-point-based method](https://ieeexplore.ieee.org/document/8464792/).
 - [ ] Montgomery squaring variants of all of the above algorithms.
@@ -39,7 +39,7 @@ The following algorithms are not yet implemented:
 | Acar (CIOS)         | Done         | Done         | N/A  | TODO     |                                                       |
 | BH23                | Done         | Done         | N/A  | TODO     | The gnark-optimised version of CIOS.                  |
 | BM17                | Done         | TODO         | Yes  | TODO     | Uses NEON vector instructions.                        |
-| SLGCK14             | TODO         | TODO         | Y    | TODO     | Optimisations to BM17.                                |
+| SLGCK14             | Done         | N/A          | Y    | TODO     | Optimisations to BM17.                                |
 | Yuval Domb CIOS     | TODO         | Done         | TODO | TODO     |                                                       |
 | EZW18               | TODO         | TODO         | ?    | TODO     | Emmart's method. Requires floating-point `madd`.      |
 
@@ -73,13 +73,7 @@ final reduction is omittted.
 | BH23      | 64 bits   | 105             |
 | Domb      | 64 bits   | 104             |
 | BM17      | 32 bits   | 123             |
-
-## Potential research directions
-
-- Combine Emmart's method with BM17 or SLGCK14. Emmart's method only uses one
-  out of two available lanes, and it's possible that multiplications in BM17
-  can be achieved via the floating-point trick. Furthermore, the larger limb
-  size may provide a speedup.
+| SLGCK14   | 32 bits   | 182             |
 
 ## Quick start
 

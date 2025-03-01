@@ -221,3 +221,7 @@ static inline uint32_t i32x4_extract_2(i32x4 a) {
 static inline uint32_t i32x4_extract_1(i32x4 a) {
     return vgetq_lane_u32(a, 1);
 }
+
+static inline i32x4 i32x4_set_lane(i32x4 a, int i, uint32_t x) {
+    return vsetq_lane_u32(x, a, i);
+}

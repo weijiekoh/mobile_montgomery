@@ -10,7 +10,7 @@ clean:
 	rm -rf build/*
 
 # Tests
-tests: tests_simd tests_bigints tests_acar_mont_neon tests_acar_mont_4x64_neon tests_bh23_mont_neon tests_bh23_mont_4x64_neon tests_domb_mont_4x64_neon tests_bm17_mont_neon tests_slgck14_mont_neon tests_carrylast_mont_neon
+tests: tests_simd tests_bigints tests_acar_mont_neon tests_acar_mont_4x64_neon tests_bh23_mont_neon tests_bh23_mont_4x64_neon tests_domb_mont_4x64_neon tests_bm17_mont_neon tests_slgck14_mont_neon
 
 run_tests_neon:
 	build/tests/simd_neon
@@ -155,14 +155,8 @@ tests_slgck14_mont_neon:
 emulate_tests_slgck14_mont_neon:
 	$(EMULATOR) build/tests/slgck14/mont_neon
 
-## tests/carrylast/mont_neon
-tests_carrylast_mont_neon: N := mont
-tests_carrylast_mont_neon:
-	mkdir -p build/tests/carrylast
-	$(ARM_CC) $(CFLAGS_NEON) tests/carrylast/$(N).c -o build/tests/carrylast/$(N)_neon
-
-emulate_tests_carrylast_mont_neon:
-	$(EMULATOR) build/tests/carrylast/mont_neon
+run_tests_slgck14_mont_neon:
+	build/tests/slgck14/mont_neon
 
 # Benchmarks
 benchmarks: benchmarks_acar benchmarks_acar_neon benchmarks_acar_4x64_neon benchmarks_bh23_neon benchmarks_bh23_4x64_neon benchmarks_domb_4x64_neon benchmarks_bm17_neon benchmarks_slgck14 benchmarks_slgck14_neon

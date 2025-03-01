@@ -21,6 +21,12 @@ MU_TEST(test_mont_mul) {
     result = bigint_from_hex(p_hex, &p);
     mu_check(result == 0);
 
+    i64 vp40 = i32x2_make(p.v[4], p.v[0]);
+    i64 vp62 = i32x2_make(p.v[6], p.v[2]);
+    i64 vp51 = i32x2_make(p.v[5], p.v[1]);
+    i64 vp73 = i32x2_make(p.v[7], p.v[3]);
+    i64 transposed_p[4] = {vp40, vp62, vp51, vp73};
+
     size_t NUM_TESTS = 1024;
 
     for (int i = 0; i < NUM_TESTS; i++) {
@@ -35,8 +41,19 @@ MU_TEST(test_mont_mul) {
         result = bigint_from_hex(c_hex, &expected);
         mu_check(result == 0);
 
+        i64 vai[NUM_LIMBS];
+        for (int i = 0; i < NUM_LIMBS; i++) {
+            vai[i] = i32x2_make(ar.v[i], ar.v[i]);
+        }
+
+        i64 transposed_b[4];
+        transposed_b[0] = i32x2_make(br.v[4], br.v[0]);
+        transposed_b[1] = i32x2_make(br.v[6], br.v[2]);
+        transposed_b[2] = i32x2_make(br.v[5], br.v[1]);
+        transposed_b[3] = i32x2_make(br.v[7], br.v[3]);
+
         // Perform mont mul
-        abr = mont_mul(&ar, &br, &p, n0);
+        abr = mont_mul(&vai, &transposed_b, &p, &transposed_p, n0);
 
         char *abr_hex = bigint_to_hex(&abr);
 

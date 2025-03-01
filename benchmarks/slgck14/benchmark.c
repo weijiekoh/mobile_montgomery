@@ -56,6 +56,12 @@ int main(int argc, char *argv[]) {
     result = bigint_from_hex(p_hex, &p);
     assert(result == 0);
 
+    i64 vp40 = i32x2_make(p.v[4], p.v[0]);
+    i64 vp62 = i32x2_make(p.v[6], p.v[2]);
+    i64 vp51 = i32x2_make(p.v[5], p.v[1]);
+    i64 vp73 = i32x2_make(p.v[7], p.v[3]);
+    i64 transposed_p[4] = {vp40, vp62, vp51, vp73};
+
     int num_runs = 5;
 
     for (int i = length - 1; i < length; i++) {
