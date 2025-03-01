@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run:  sudo apt install gcc-aarch64-linux-gnu qemu-user qemu-user-static
+      run:  sudo apt -y update && sudo apt -y install gcc-aarch64-linux-gnu qemu-user qemu-user-static
     - name: make
       run: make
     - name: Run tests
